@@ -2,7 +2,7 @@ import { M1CTLogo, InstagramIcon, GlobalIcon } from '../icons';
 
 export function Header() {
   return (
-    <nav className="flex justify-between items-center px-6 py-2 bg-white">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-2 bg-white">
       {/* Logo */}
       <M1CTLogo className="text-text-primary" />
       
