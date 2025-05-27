@@ -44,9 +44,9 @@ export function Home() {
   };
 
   return (
-    <div className="bg-white rounded-b-2xl flex-1 flex flex-col">
+    <div className="flex flex-col gap-1 pt-16 pb-20">
       {/* Title Section */}
-      <section className="px-6 pt-6">
+      <section className="bg-white rounded-b-4 px-6 py-6 flex-1 flex flex-col justify-between gap-2">
         <div className="mb-2">
           <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight">
             {nfcCoffeeData ? nfcCoffeeData.name : 'Addisu Hulichaye, Ethiopia'}
@@ -67,8 +67,9 @@ export function Home() {
       </section>
 
       {/* Comment Card */}
-      <section className="mx-6 mt-4">
-        <div className="bg-comment-bg rounded-2xl p-6">
+      <section className="bg-comment-bg rounded-4 px-6 py-6">
+        <div className="flex gap-2">
+          <div className="flex flex-col justify-center items-center gap-2.5 flex-1">
           <p className="text-sm text-text-muted font-normal mb-2">
             {nfcCoffeeData ? 'NFC 스캔 결과' : 'master comment'}
           </p>
@@ -78,6 +79,7 @@ export function Home() {
               : '"Addisu is a member of the Lalisaa Project, an initiative that aims to provide opportunity and resources for smallholder farmers in Sidamo."'
             }
           </p>
+          </div>
         </div>
       </section>
 
@@ -124,16 +126,18 @@ export function Home() {
       )}
 
       {/* CTA Section */}
-      <section className="mx-6 mt-4 mb-6">
-        <div className="bg-cta-bg rounded-2xl p-6 flex items-center justify-between">
-          {/* Logo placeholder */}
-          <div className="w-15 h-4 bg-gray-800 rounded"></div>
+      <section className="bg-cta-bg rounded-4 px-6 py-6">
+        <div className="flex justify-between items-center gap-2">
+          {/* Logo */}
+          <div className="text-base font-bold text-text-primary">M1CT</div>
           
           {/* Buy Button */}
-          <button className="bg-white text-text-primary border border-dark-navy rounded-full px-4 py-2 flex items-center gap-2 font-bold text-base hover:bg-gray-50 transition-colors">
-            buy whole bean
-            <ArrowRightIcon size={18} />
-          </button>
+          <div className="flex items-center gap-2 px-4 py-2 border border-dark-navy rounded-full">
+            <span className="text-base font-bold text-text-primary">
+              buy whole bean
+            </span>
+            <ArrowRightIcon size={24} />
+          </div>
         </div>
       </section>
     </div>

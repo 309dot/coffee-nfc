@@ -1,4 +1,4 @@
-import { Badge } from '../components/ui/Badge';
+
 import { StoreIcon } from '../components/icons';
 
 interface Product {
@@ -36,7 +36,7 @@ export function Products() {
   ];
 
   return (
-    <div className="bg-white rounded-b-2xl flex-1 flex flex-col">
+    <div className="bg-white rounded-b-2xl flex-1 flex flex-col pt-20 pb-24">
       {/* Header */}
       <section className="px-6 pt-6 pb-4">
         <div className="flex items-center gap-3 mb-4">
@@ -50,37 +50,28 @@ export function Products() {
         </p>
       </section>
 
-      {/* Products List */}
+      {/* Products Grid */}
       <section className="px-6 flex-1 overflow-y-auto">
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
           {products.map((product) => (
             <div
               key={product.id}
-              className="bg-gray-50 rounded-2xl p-4 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="flex flex-col gap-2 w-[155.5px] cursor-pointer"
             >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <h3 className="font-bold text-text-primary text-lg">
-                    {product.name}
-                  </h3>
-                  <p className="text-text-muted text-sm mt-1">
-                    {product.origin}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-text-primary">
-                    ₩{product.price.toLocaleString()}
-                  </p>
-                </div>
-              </div>
+              {/* Image */}
+              <div className="w-full h-[180px] bg-gray-200 rounded-lg bg-cover bg-center" />
               
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2">
-                {product.badges.map((badge, index) => (
-                  <Badge key={index} variant="secondary">
-                    {badge}
-                  </Badge>
-                ))}
+              {/* Text Content */}
+              <div className="flex flex-col">
+                <span className="text-sm font-normal text-text-muted leading-[1.43] tracking-[-0.007em]">
+                  coffee
+                </span>
+                <span className="text-base font-semibold text-text-primary leading-[1.5] tracking-[-0.0125em]">
+                  {product.name}
+                </span>
+                <span className="text-base font-normal text-text-primary leading-[1.5] tracking-[-0.0125em]">
+                  ₩{product.price.toLocaleString()}
+                </span>
               </div>
             </div>
           ))}
