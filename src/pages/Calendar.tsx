@@ -1,4 +1,11 @@
+import { useEffect } from 'react';
+
 export function Calendar() {
+  useEffect(() => {
+    // 페이지 진입 시 상단으로 스크롤
+    window.scrollTo(0, 0);
+  }, []);
+
   const coffeeInfo = {
     title: "Addisu Hulichaye, Ethiopia",
     subtitle: "Addisu Hulichaye, Ethiopia",

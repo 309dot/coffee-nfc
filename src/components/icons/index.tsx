@@ -46,6 +46,7 @@ export function ArrowRightIcon({ size = 20, className }: IconProps) {
 }
 
 // Export new custom icons
+export { LeadIcon } from './LeadIcon';
 export { CupIcon } from './CupIcon';
 export { TodoIcon } from './TodoIcon';
 export { Store2Icon } from './Store2Icon';

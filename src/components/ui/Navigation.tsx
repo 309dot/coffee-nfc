@@ -1,4 +1,4 @@
-import { CupIcon, TodoIcon, Store2Icon, MenuLineIcon } from '../icons';
+import { LeadIcon, TodoIcon, Store2Icon, MenuLineIcon } from '../icons';
 import { cn } from '../../utils/cn';
 
 interface NavigationProps {
@@ -8,7 +8,7 @@ interface NavigationProps {
 
 export function Navigation({ activeTab = 'coffee', onTabChange }: NavigationProps) {
   const navItems = [
-    { id: 'coffee', icon: CupIcon, label: 'Coffee' },
+    { id: 'coffee', icon: LeadIcon, label: 'Coffee' },
     { id: 'calendar', icon: TodoIcon, label: 'Calendar' },
     { id: 'store', icon: Store2Icon, label: 'Store' },
     { id: 'menu', icon: MenuLineIcon, label: 'Menu' },

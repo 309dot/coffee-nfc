@@ -8,8 +8,12 @@ interface LayoutProps {
 }
 
 export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
+  const isCalendarPage = activeTab === 'calendar';
+  
   return (
-    <div className="w-full min-h-screen bg-dark-navy font-inter flex flex-col">
+    <div className={`w-full min-h-screen font-inter flex flex-col ${
+      isCalendarPage ? 'bg-white' : 'bg-dark-navy'
+    }`}>
       <Header />
       <main className="flex-1 flex flex-col pt-16 pb-24">
         {children}
