@@ -8,10 +8,10 @@ export function Header() {
       
       {/* Button Group */}
       <div className="flex gap-2">
-        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
+        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors">
           <InstagramIcon size={20} className="text-text-primary" />
         </button>
-        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
+        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors">
           <GlobalIcon size={20} className="text-text-primary" />
         </button>
       </div>

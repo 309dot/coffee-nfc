@@ -45,6 +45,12 @@ export function ArrowRightIcon({ size = 20, className }: IconProps) {
   return <ArrowRight size={size} className={className} />;
 }
 
+// Export new custom icons
+export { CupIcon } from './CupIcon';
+export { TodoIcon } from './TodoIcon';
+export { Store2Icon } from './Store2Icon';
+export { MenuLineIcon } from './MenuLineIcon';
+
 // M1CT Logo Component
 interface LogoProps {
   className?: string;
