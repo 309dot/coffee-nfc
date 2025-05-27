@@ -68,7 +68,7 @@ export function Products() {
 
   return (
     <>
-      <div className="bg-black flex-1 flex flex-col overflow-y-auto">
+      <div className="bg-white flex-1 flex flex-col overflow-y-auto">
         <div className="px-6 py-12 gap-12">
           {/* Shop Card Wrap */}
           <div className="h-[740px]">
@@ -87,13 +87,13 @@ export function Products() {
               
                              {/* Text Content */}
                <div className="flex flex-col">
-                 <span className="text-sm font-normal text-white/40 leading-[1.43] tracking-[-0.007em]">
+                 <span className="text-sm font-normal text-text-muted leading-[1.43] tracking-[-0.007em]">
                    coffee
                  </span>
-                 <span className="text-base font-semibold text-white leading-[1.5] tracking-[-0.0125em]">
+                 <span className="text-base font-semibold text-text-primary leading-[1.5] tracking-[-0.0125em]">
                    esspresso syrup
                  </span>
-                 <span className="text-base font-normal text-white leading-[1.5] tracking-[-0.0125em]">
+                 <span className="text-base font-normal text-text-primary leading-[1.5] tracking-[-0.0125em]">
                    23,000원
                  </span>
                </div>
