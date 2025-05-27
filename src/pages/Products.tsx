@@ -21,47 +21,25 @@ function ProductModal({ isOpen, onClose, product }: ModalProps) {
   if (!isOpen || !product) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl w-[327px] h-[620px] flex flex-col gap-4 p-4 pb-6 shadow-lg">
-        {/* Top Button */}
-        <div className="flex justify-end">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-sm mx-auto flex flex-col shadow-lg">
+        {/* Modal Header */}
+        <div className="flex justify-between items-center p-6 pb-4">
+          <h2 className="text-xl font-bold text-text-primary">
+            상품 상세
+          </h2>
           <button
             onClick={onClose}
-            className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path 
-                d="M14.6967 14.6967C14.8897 14.8897 14.8897 15.2026 14.6967 15.3956C14.5037 15.5886 14.1908 15.5886 13.9978 15.3956L10 11.3978L6.00224 15.3956C5.80924 15.5886 5.49635 15.5886 5.30335 15.3956C5.11035 15.2026 5.11035 14.8897 5.30335 14.6967L9.30113 10.6989L5.30335 6.70112C5.11035 6.50812 5.11035 6.19523 5.30335 6.00223C5.49635 5.80923 5.80924 5.80923 6.00224 6.00223L10 10L13.9978 6.00223C14.1908 5.80923 14.5037 5.80923 14.6967 6.00223C14.8897 6.19523 14.8897 6.50812 14.6967 6.70112L10.6989 10.6989L14.6967 14.6967Z" 
-                fill="rgba(15, 19, 36, 0.6)"
-              />
-            </svg>
+            ✕
           </button>
         </div>
 
-        {/* Container */}
-        <div className="flex flex-col gap-6 flex-1">
-          {/* Product Info */}
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-normal text-text-muted leading-[1.43] tracking-[-0.007em]">
-              {product.origin}
-            </span>
-            <h2 className="text-2xl font-bold text-text-primary leading-[1.33] tracking-[-0.0125em]">
-              {product.name}
-            </h2>
-            <p className="text-base font-normal text-text-primary leading-[1.5] tracking-[-0.0125em]">
-              ₩{product.price.toLocaleString()}
-            </p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {product.badges.map((badge, index) => (
-                <Badge key={index}>
-                  {badge}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Image */}
-          <div className="flex-1 bg-gray-200 rounded-lg bg-cover bg-center overflow-hidden">
+        {/* Modal Content */}
+        <div className="px-6 pb-6 flex flex-col gap-4">
+          {/* Product Image */}
+          <div className="w-full h-48 rounded-xl overflow-hidden">
             <img
               src="/images/modal_img_sample.jpg"
               alt={product.name}
@@ -69,10 +47,34 @@ function ProductModal({ isOpen, onClose, product }: ModalProps) {
             />
           </div>
 
-          {/* Purchase Button */}
-          <button className="bg-badge-bg text-badge-text px-6 py-3 rounded-full font-medium hover:bg-badge-bg/80 transition-colors">
-            구매하기
-          </button>
+          {/* Product Info */}
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-lg font-bold text-text-primary">
+                {product.name}
+              </h3>
+              <p className="text-sm text-text-muted">
+                {product.origin}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {product.badges.map((badge, index) => (
+                <Badge key={index} variant="secondary">
+                  {badge}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="flex justify-between items-center pt-4 border-t">
+              <span className="text-xl font-bold text-text-primary">
+                ₩{product.price.toLocaleString()}
+              </span>
+              <button className="bg-badge-bg text-badge-text px-6 py-2 rounded-full font-medium hover:bg-badge-bg/80 transition-colors">
+                구매하기
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -107,6 +109,14 @@ export function Products() {
       badges: ['spicy', 'smoky', 'dark roast'],
       image: '/images/shop_img_sample.jpg',
     },
+    {
+      id: '4',
+      name: 'Brazilian Santos',
+      origin: 'Santos, Brazil',
+      price: 20000,
+      badges: ['nutty', 'sweet', 'medium roast'],
+      image: '/images/shop_img_sample.jpg',
+    },
   ];
 
   const handleProductClick = (product: Product) => {
@@ -119,7 +129,7 @@ export function Products() {
 
   return (
     <>
-      <div className="bg-white rounded-b-2xl flex-1 flex flex-col">
+      <div className="bg-white min-h-screen flex flex-col">
         {/* Header */}
         <section className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3 mb-4">
@@ -133,49 +143,43 @@ export function Products() {
           </p>
         </section>
 
-        {/* Products List */}
-        <section className="px-6 flex-1 overflow-y-auto">
-          <div className="space-y-4">
+        {/* Products Grid - 2단 레이아웃 */}
+        <section className="px-6 flex-1">
+          <div className="grid grid-cols-2 gap-4">
             {products.map((product) => (
               <div
                 key={product.id}
                 onClick={() => handleProductClick(product)}
-                className="bg-white border border-gray-200 rounded-2xl p-4 hover:shadow-md transition-all cursor-pointer"
+                className="bg-white border border-gray-200 rounded-2xl p-3 hover:shadow-md transition-all cursor-pointer"
               >
-                <div className="flex gap-4">
-                  {/* Product Image */}
-                  <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                {/* Product Image */}
+                <div className="w-full aspect-square rounded-xl overflow-hidden mb-3">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                {/* Product Info */}
+                <div className="space-y-1">
+                  <h3 className="font-bold text-text-primary text-sm leading-tight">
+                    {product.name}
+                  </h3>
+                  <p className="text-text-muted text-xs">
+                    {product.origin}
+                  </p>
+                  <p className="font-bold text-text-primary text-sm">
+                    ₩{product.price.toLocaleString()}
+                  </p>
                   
-                  {/* Product Info */}
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-bold text-text-primary text-lg">
-                          {product.name}
-                        </h3>
-                        <p className="text-text-muted text-sm">
-                          {product.origin}
-                        </p>
-                      </div>
-                      <p className="font-bold text-text-primary">
-                        ₩{product.price.toLocaleString()}
-                      </p>
-                    </div>
-                    
-                    {/* Badges */}
-                    <div className="flex flex-wrap gap-1">
-                      {product.badges.map((badge, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {badge}
-                        </Badge>
-                      ))}
-                    </div>
+                  {/* Badges - 최대 2개만 표시 */}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {product.badges.slice(0, 2).map((badge, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
+                        {badge}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </div>
