@@ -9,7 +9,7 @@ function NoticeModal({ isOpen, onClose }: ModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-55 p-4">
       <div className="bg-white rounded-2xl w-[327px] h-[620px] flex flex-col gap-4 p-4 pb-6 shadow-lg">
         {/* Top Button */}
         <div className="flex justify-end">
