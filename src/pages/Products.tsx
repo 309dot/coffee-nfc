@@ -11,6 +11,74 @@ interface Product {
   image: string;
 }
 
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  product: Product | null;
+}
+
+function ProductModal({ isOpen, onClose, product }: ModalProps) {
+  if (!isOpen || !product) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded-2xl w-[327px] h-[620px] flex flex-col gap-4 p-4 pb-6 shadow-lg">
+        {/* Top Button */}
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path 
+                d="M14.6967 14.6967C14.8897 14.8897 14.8897 15.2026 14.6967 15.3956C14.5037 15.5886 14.1908 15.5886 13.9978 15.3956L10 11.3978L6.00224 15.3956C5.80924 15.5886 5.49635 15.5886 5.30335 15.3956C5.11035 15.2026 5.11035 14.8897 5.30335 14.6967L9.30113 10.6989L5.30335 6.70112C5.11035 6.50812 5.11035 6.19523 5.30335 6.00223C5.49635 5.80923 5.80924 5.80923 6.00224 6.00223L10 10L13.9978 6.00223C14.1908 5.80923 14.5037 5.80923 14.6967 6.00223C14.8897 6.19523 14.8897 6.50812 14.6967 6.70112L10.6989 10.6989L14.6967 14.6967Z" 
+                fill="rgba(15, 19, 36, 0.6)"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Container */}
+        <div className="flex flex-col gap-6 flex-1">
+          {/* Product Info */}
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-normal text-text-muted leading-[1.43] tracking-[-0.007em]">
+              {product.origin}
+            </span>
+            <h2 className="text-2xl font-bold text-text-primary leading-[1.33] tracking-[-0.0125em]">
+              {product.name}
+            </h2>
+            <p className="text-base font-normal text-text-primary leading-[1.5] tracking-[-0.0125em]">
+              ₩{product.price.toLocaleString()}
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {product.badges.map((badge, index) => (
+                <Badge key={index}>
+                  {badge}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Image */}
+          <div className="flex-1 bg-gray-200 rounded-lg bg-cover bg-center overflow-hidden">
+            <img
+              src="/images/modal_img_sample.jpg"
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Purchase Button */}
+          <button className="bg-badge-bg text-badge-text px-6 py-3 rounded-full font-medium hover:bg-badge-bg/80 transition-colors">
+            구매하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Products() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -45,7 +113,7 @@ export function Products() {
     setSelectedProduct(product);
   };
 
-  const closeModal = () => {
+  const handleCloseModal = () => {
     setSelectedProduct(null);
   };
 
@@ -117,67 +185,11 @@ export function Products() {
       </div>
 
       {/* Modal */}
-      {selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              {/* Modal Header */}
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-text-primary">
-                  {selectedProduct.name}
-                </h2>
-                <button
-                  onClick={closeModal}
-                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Modal Image */}
-              <div className="w-full h-48 rounded-xl overflow-hidden mb-4">
-                <img
-                  src="/images/modal_img_sample.jpg"
-                  alt={selectedProduct.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Modal Content */}
-              <div className="space-y-4">
-                <div>
-                  <p className="text-text-muted text-sm mb-1">원산지</p>
-                  <p className="text-text-primary font-medium">
-                    {selectedProduct.origin}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-text-muted text-sm mb-2">특징</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedProduct.badges.map((badge, index) => (
-                      <Badge key={index}>
-                        {badge}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-text-primary">
-                      ₩{selectedProduct.price.toLocaleString()}
-                    </span>
-                    <button className="bg-badge-bg text-badge-text px-6 py-2 rounded-full font-medium hover:bg-badge-bg/80 transition-colors">
-                      구매하기
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ProductModal 
+        isOpen={!!selectedProduct} 
+        onClose={handleCloseModal} 
+        product={selectedProduct}
+      />
     </>
   );
 } 

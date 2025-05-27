@@ -1,4 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-dark-navy: #0B0C0E;
+  --color-text-primary: #14151A;
+  --color-badge-bg: #E3EAFD;
+  --color-badge-text: #133A9A;
+  --color-comment-bg: #FFF58A;
+  --color-cta-bg: #8AE0FF;
+  --color-text-muted: rgba(15, 19, 36, 0.6);
+  
+  --font-family-inter: Inter, sans-serif;
+}
