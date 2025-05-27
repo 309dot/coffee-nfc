@@ -54,7 +54,7 @@ export function Menu() {
 
   return (
     <div className="bg-white rounded-b-2xl flex-1 flex flex-col">
-      {/* Header */}
+      {/* Header - 텍스트 영역 */}
       <section className="px-6 pt-6 pb-4">
         <div className="flex items-center gap-3 mb-4">
           <MenuIcon size={24} className="text-badge-text" />
@@ -67,8 +67,8 @@ export function Menu() {
         </p>
       </section>
 
-      {/* Categories */}
-      <section className="px-6 mb-4">
+      {/* Categories - Badge 영역 */}
+      <section className="px-6 mb-6">
         <div className="flex gap-2 overflow-x-auto">
           {categories.map((category) => (
             <Badge key={category.id} className="whitespace-nowrap">
