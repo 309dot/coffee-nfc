@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { MenuIcon, CoffeeIcon } from '../components/icons';
-import { Badge } from '../components/ui/Badge';
 
 interface StatsCard {
   id: string;
