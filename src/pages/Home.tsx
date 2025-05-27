@@ -44,9 +44,9 @@ export function Home() {
   };
 
   return (
-    <div className="flex flex-col gap-1 pt-16 pb-20">
+    <div className="flex flex-col gap-1">
       {/* Title Section */}
-      <section className="bg-white rounded-b-4 px-6 py-6 flex-1 flex flex-col justify-between gap-2">
+      <section className="bg-white rounded-b-2xl px-6 py-6 flex flex-col gap-2">
         <div className="mb-2">
           <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight">
             {nfcCoffeeData ? nfcCoffeeData.name : 'Addisu Hulichaye, Ethiopia'}
@@ -67,9 +67,8 @@ export function Home() {
       </section>
 
       {/* Comment Card */}
-      <section className="bg-comment-bg rounded-4 px-6 py-6">
-        <div className="flex gap-2">
-          <div className="flex flex-col justify-center items-center gap-2.5 flex-1">
+      <section className="bg-comment-bg rounded-2xl mx-6 p-6">
+        <div className="flex flex-col gap-2.5">
           <p className="text-sm text-text-muted font-normal mb-2">
             {nfcCoffeeData ? 'NFC 스캔 결과' : 'master comment'}
           </p>
@@ -79,7 +78,6 @@ export function Home() {
               : '"Addisu is a member of the Lalisaa Project, an initiative that aims to provide opportunity and resources for smallholder farmers in Sidamo."'
             }
           </p>
-          </div>
         </div>
       </section>
 
@@ -126,7 +124,7 @@ export function Home() {
       )}
 
       {/* CTA Section */}
-      <section className="bg-cta-bg rounded-4 px-6 py-6">
+      <section className="bg-cta-bg rounded-2xl mx-6 p-6">
         <div className="flex justify-between items-center gap-2">
           {/* Logo */}
           <div className="text-base font-bold text-text-primary">M1CT</div>

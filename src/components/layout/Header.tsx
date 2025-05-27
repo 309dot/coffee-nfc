@@ -1,18 +1,18 @@
-import { InstagramIcon, GlobeIcon } from '../icons';
+import { M1CTLogo, InstagramIcon, GlobalIcon } from '../icons';
 
 export function Header() {
   return (
-    <nav className="flex justify-between items-center px-6 py-2 bg-white rounded-b-2xl">
+    <nav className="flex justify-between items-center px-6 py-2 bg-white">
       {/* Logo */}
-      <div className="w-15 h-4 bg-gray-800 rounded"></div>
+      <M1CTLogo className="text-text-primary" />
       
       {/* Button Group */}
       <div className="flex gap-2">
-        <button className="w-10 h-10 bg-badge-bg rounded-full flex items-center justify-center hover:bg-badge-bg/80 transition-colors">
-          <InstagramIcon size={18} className="text-badge-text" />
+        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
+          <InstagramIcon size={20} className="text-text-primary" />
         </button>
-        <button className="w-10 h-10 bg-badge-bg rounded-full flex items-center justify-center hover:bg-badge-bg/80 transition-colors">
-          <GlobeIcon size={18} className="text-badge-text" />
+        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
+          <GlobalIcon size={20} className="text-text-primary" />
         </button>
       </div>
     </nav>
