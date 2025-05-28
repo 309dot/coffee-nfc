@@ -53,3 +53,4 @@ export default tseslint.config({
 })
 ```
 # 최종 연동 완료
+# flavorNotes와 story 필드 완전 구현
