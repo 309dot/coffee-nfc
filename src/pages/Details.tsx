@@ -3,6 +3,7 @@ import { Badge } from '../components/ui/Badge';
 import { ArrowRightIcon } from '../components/icons';
 import { api, type CoffeeData } from '../services/api';
 import { useAppStore } from '../store/useAppStore';
+import { analyticsService } from '../services/analytics';
 
 interface DetailsProps {
   coffeeId?: string;
@@ -19,6 +20,9 @@ export function Details({ coffeeId = 'eth-001' }: DetailsProps) {
       try {
         const data = await api.getCoffeeById(coffeeId);
         setCoffee(data);
+        
+        // 분석 추적: 페이지 조회
+        analyticsService.trackView(coffeeId);
       } catch (error) {
         console.error('Error loading coffee data:', error);
       } finally {
