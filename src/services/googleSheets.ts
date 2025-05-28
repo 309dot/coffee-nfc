@@ -45,7 +45,7 @@ class GoogleSheetsService {
   private parseSheetData(values: string[][]): CoffeeData[] {
     if (!values || values.length < 2) return [];
 
-    const [headers, ...rows] = values;
+    const [, ...rows] = values;
     
     return rows.map((row, index) => ({
       id: row[0] || `coffee-${index + 1}`,
