@@ -1,13 +1,49 @@
+import { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { M1CTLogo, ArrowRightIcon } from '../components/icons';
+import { api, type CoffeeData } from '../services/api';
 
 export function Home() {
-  const badges = [
-    { id: '1', label: 'lemon peel' },
-    { id: '2', label: 'peach' },
-    { id: '3', label: 'orange' },
-    { id: '4', label: 'butter milk pudding' },
-  ];
+  const [coffee, setCoffee] = useState<CoffeeData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCoffeeData = async () => {
+      setLoading(true);
+      try {
+        // 첫 번째 활성 원두 데이터 로드
+        const allCoffees = await api.getAllCoffees();
+        if (allCoffees.length > 0) {
+          setCoffee(allCoffees[0]);
+        }
+      } catch (error) {
+        console.error('Error loading coffee data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCoffeeData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-1 min-h-screen justify-center items-center">
+        <div className="animate-pulse">
+          <div className="w-16 h-16 bg-gray-200 rounded-full mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-32"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!coffee) {
+    return (
+      <div className="flex flex-col gap-1 min-h-screen justify-center items-center">
+        <p className="text-text-muted">커피 정보를 찾을 수 없습니다.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-1 min-h-screen justify-between">
@@ -15,18 +51,18 @@ export function Home() {
       <section className="bg-white rounded-b-2xl px-6 py-12 flex flex-col gap-2 flex-1 justify-center">
         <div className="mb-auto">
           <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight">
-            Addisu Hulichaye, Ethiopia
+            {coffee.name}
           </h1>
           <p className="text-base font-light text-text-primary mt-2 tracking-tight">
-            Addisu Hulichaye, Ethiopia
+            {coffee.origin}
           </p>
         </div>
         
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mt-2">
-          {badges.map((badge, index) => (
+          {coffee.badges.map((badge, index) => (
             <Badge key={index}>
-              {badge.label}
+              {badge}
             </Badge>
           ))}
         </div>
@@ -39,7 +75,7 @@ export function Home() {
             master comment
           </p>
           <p className="text-base font-bold text-text-primary">
-            "Addisu is a member of the Lalisaa Project, an initiative that aims to provide opportunity and resources for smallholder farmers in Sidamo."
+            "{coffee.description}"
           </p>
         </div>
       </section>
