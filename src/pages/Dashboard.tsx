@@ -10,6 +10,60 @@ interface CoffeeCardProps {
   onToggleActive: (id: string, active: boolean) => void;
 }
 
+// SVG 아이콘 컴포넌트들
+const Icons = {
+  Home: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+  ),
+  Detail: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+  Shop: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+    </svg>
+  ),
+  Edit: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+    </svg>
+  ),
+  Toggle: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+    </svg>
+  ),
+  Delete: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  ),
+  Add: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+    </svg>
+  ),
+  Close: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
+  Save: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+  ),
+  Copy: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  )
+};
+
 function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProps) {
   const baseUrl = window.location.origin;
   const urls = {
@@ -68,53 +122,66 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
         {coffee.masterComment}
       </p>
 
-      {/* URL 정보 섹션 */}
+      {/* URL 정보 섹션 - 아이콘 버튼으로 변경 */}
       <div className="mb-4 p-3 bg-gray-50 rounded-lg">
         <h4 className="text-sm font-medium text-text-primary mb-3">페이지 URL</h4>
         <div className="flex gap-2">
           <button
             onClick={() => copyToClipboard(urls.home, 'Home')}
-            className="flex-1 py-2 px-3 bg-blue-100 text-blue-800 rounded-lg text-xs font-medium hover:bg-blue-200 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-3 bg-blue-100 text-blue-800 rounded-lg text-xs font-medium hover:bg-blue-200 transition-colors"
+            title="Home URL 복사"
           >
-            Home URL 복사
+            <Icons.Home className="w-4 h-4" />
+            <Icons.Copy className="w-3 h-3" />
           </button>
           <button
             onClick={() => copyToClipboard(urls.detail, 'Detail')}
-            className="flex-1 py-2 px-3 bg-green-100 text-green-800 rounded-lg text-xs font-medium hover:bg-green-200 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-3 bg-green-100 text-green-800 rounded-lg text-xs font-medium hover:bg-green-200 transition-colors"
+            title="Detail URL 복사"
           >
-            Detail URL 복사
+            <Icons.Detail className="w-4 h-4" />
+            <Icons.Copy className="w-3 h-3" />
           </button>
           <button
             onClick={() => copyToClipboard(urls.shop, 'Shop')}
-            className="flex-1 py-2 px-3 bg-purple-100 text-purple-800 rounded-lg text-xs font-medium hover:bg-purple-200 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-3 bg-purple-100 text-purple-800 rounded-lg text-xs font-medium hover:bg-purple-200 transition-colors"
+            title="Shop URL 복사"
           >
-            Shop URL 복사
+            <Icons.Shop className="w-4 h-4" />
+            <Icons.Copy className="w-3 h-3" />
           </button>
         </div>
       </div>
 
+      {/* CRUD 버튼들 - 아이콘 버튼으로 변경 */}
       <div className="flex gap-2">
         <button
           onClick={() => onEdit(coffee.id)}
-          className="flex-1 py-2 px-3 bg-text-primary text-white rounded-lg text-sm font-medium hover:bg-text-primary/90"
+          className="flex-1 flex items-center justify-center gap-2 py-3 px-3 bg-text-primary text-white rounded-lg text-sm font-medium hover:bg-text-primary/90"
+          title="편집"
         >
-          편집
+          <Icons.Edit className="w-4 h-4" />
+          <span className="hidden sm:inline">편집</span>
         </button>
         <button
           onClick={() => onToggleActive(coffee.id, !coffee.active)}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium ${
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-medium ${
             coffee.active
               ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
               : 'bg-green-100 text-green-800 hover:bg-green-200'
           }`}
+          title={coffee.active ? '비활성화' : '활성화'}
         >
-          {coffee.active ? '비활성화' : '활성화'}
+          <Icons.Toggle className="w-4 h-4" />
+          <span className="hidden sm:inline">{coffee.active ? '비활성화' : '활성화'}</span>
         </button>
         <button
           onClick={() => onDelete(coffee.id)}
-          className="py-2 px-3 bg-red-100 text-red-800 rounded-lg text-sm font-medium hover:bg-red-200"
+          className="flex items-center justify-center gap-2 py-3 px-3 bg-red-100 text-red-800 rounded-lg text-sm font-medium hover:bg-red-200"
+          title="삭제"
         >
-          삭제
+          <Icons.Delete className="w-4 h-4" />
+          <span className="hidden sm:inline">삭제</span>
         </button>
       </div>
     </div>
@@ -291,7 +358,7 @@ export function Dashboard() {
   return (
     <div className="bg-white flex-1 flex flex-col overflow-y-auto">
       <div className="px-6 py-8 space-y-6">
-        {/* Header */}
+        {/* Header - 새 원두 추가 버튼을 아이콘 버튼으로 변경 */}
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-text-primary">커피 관리 대시보드</h1>
@@ -299,8 +366,9 @@ export function Dashboard() {
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-text-primary text-white rounded-lg font-medium hover:bg-text-primary/90"
+            className="flex items-center gap-2 px-4 py-2 bg-text-primary text-white rounded-lg font-medium hover:bg-text-primary/90"
           >
+            <Icons.Add className="w-5 h-5" />
             새 원두 추가
           </button>
         </div>
@@ -350,7 +418,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Form Modal */}
+      {/* Form Modal - 폼 버튼들도 아이콘 버튼으로 변경 */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -361,13 +429,14 @@ export function Dashboard() {
                 </h2>
                 <button
                   onClick={resetForm}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                  title="닫기"
                 >
-                  ✕
+                  <Icons.Close className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Form 내용 - 간단 버전 */}
+              {/* Form 내용 */}
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -411,9 +480,10 @@ export function Dashboard() {
                     />
                     <button
                       onClick={addFlavorNote}
-                      className="px-4 py-2 bg-text-primary text-white rounded-lg hover:bg-text-primary/90"
+                      className="flex items-center gap-2 px-4 py-2 bg-text-primary text-white rounded-lg hover:bg-text-primary/90"
+                      title="추가"
                     >
-                      추가
+                      <Icons.Add className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -527,17 +597,20 @@ export function Dashboard() {
                 </div>
               </div>
 
+              {/* 폼 버튼들 - 아이콘 버튼으로 변경 */}
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   onClick={resetForm}
-                  className="flex-1 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50"
                 >
+                  <Icons.Close className="w-4 h-4" />
                   취소
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 py-2 bg-text-primary text-white rounded-lg font-medium hover:bg-text-primary/90"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-text-primary text-white rounded-lg font-medium hover:bg-text-primary/90"
                 >
+                  <Icons.Save className="w-4 h-4" />
                   {editingCoffee ? '수정' : '추가'}
                 </button>
               </div>
