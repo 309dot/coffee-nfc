@@ -57,17 +57,18 @@ export function Calendar() {
 
   return (
     <div className="bg-white flex-1 flex flex-col overflow-y-auto">
-      <div className="px-6 py-12 space-y-12">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-text-primary leading-tight">
-            {coffee.titleKo}
-          </h1>
-          <p className="text-base font-light text-text-primary">
-            {coffee.titleEn}
-          </p>
-        </div>
+      {/* Header - Sticky */}
+      <div className="sticky top-16 z-40 bg-white px-6 py-4 shadow-sm">
+        <h1 className="text-2xl font-bold text-text-primary leading-tight">
+          {coffee.titleKo}
+        </h1>
+        <p className="text-base font-light text-text-primary">
+          {coffee.titleEn}
+        </p>
+      </div>
 
+      {/* Content Area */}
+      <div className="px-6 py-6 space-y-12">
         {/* Coffee Details */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
