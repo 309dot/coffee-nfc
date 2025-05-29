@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
 import { Calendar } from './pages/Calendar';
-import { Details } from './pages/Details';
+import { Shop } from './pages/Shop';
 import { Dashboard } from './pages/Dashboard';
 
-type Tab = 'coffee' | 'calendar' | 'coffee-details';
+type Tab = 'coffee' | 'details' | 'coffee-shop';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('coffee');
@@ -22,10 +22,10 @@ function App() {
     }
     
     // 페이지 결정 로직
-    if (page === 'details') {
-      setActiveTab('coffee-details');
-    } else if (page === 'calendar') {
-      setActiveTab('calendar');
+    if (page === 'shop') {
+      setActiveTab('coffee-shop');
+    } else if (page === 'details') {
+      setActiveTab('details');
     } else {
       // 기본값: coffee 페이지 (coffee 파라미터가 있어도 Home 페이지)
       setActiveTab('coffee');
@@ -42,9 +42,9 @@ function App() {
     switch (activeTab) {
       case 'coffee':
         return <Home />;
-      case 'coffee-details':
-        return <Details />;
-      case 'calendar':
+      case 'coffee-shop':
+        return <Shop />;
+      case 'details':
         return <Calendar />;
       default:
         return <Home />;
@@ -54,7 +54,7 @@ function App() {
   const handleTabChange = (tab: string) => {
     const tabMapping: Record<string, Tab> = {
       'coffee': 'coffee',
-      'calendar': 'calendar'
+      'details': 'details'
     };
     
     const newTab = tabMapping[tab] || 'coffee';
@@ -64,8 +64,8 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const coffeeId = urlParams.get('coffee');
     
-    if (newTab === 'calendar') {
-      window.history.pushState({}, '', `/?page=calendar${coffeeId ? `&coffee=${coffeeId}` : ''}`);
+    if (newTab === 'details') {
+      window.history.pushState({}, '', `/?page=details${coffeeId ? `&coffee=${coffeeId}` : ''}`);
     } else {
       window.history.pushState({}, '', `/${coffeeId ? `?coffee=${coffeeId}` : ''}`);
     }

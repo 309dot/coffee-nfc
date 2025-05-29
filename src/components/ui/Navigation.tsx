@@ -9,7 +9,7 @@ interface NavigationProps {
 export function Navigation({ activeTab = 'coffee', onTabChange }: NavigationProps) {
   const navItems = [
     { id: 'coffee', icon: LeadIcon, label: 'Coffee', visible: true },
-    { id: 'calendar', icon: TodoIcon, label: 'Calendar', visible: true },
+    { id: 'details', icon: TodoIcon, label: 'Detail', visible: true },
     { id: 'store', icon: Store2Icon, label: 'Store', visible: false },
     { id: 'menu', icon: MenuLineIcon, label: 'Menu', visible: false },
   ];

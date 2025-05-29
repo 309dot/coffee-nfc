@@ -5,7 +5,7 @@ import { api, type CoffeeApiData } from '../services/api';
 import { useAppStore } from '../store/useAppStore';
 import { analyticsService } from '../services/analytics';
 
-export function Details() {
+export function Shop() {
   const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const { addToCart, addToFavorites, favorites } = useAppStore();

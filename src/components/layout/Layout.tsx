@@ -7,7 +7,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
-  const isCalendarPage = currentPage === 'calendar';
+  const isCalendarPage = currentPage === 'details';
   
   return (
     <div className={`w-full min-h-screen font-inter flex flex-col ${
