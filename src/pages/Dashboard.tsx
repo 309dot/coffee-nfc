@@ -10,6 +10,23 @@ interface CoffeeCardProps {
 }
 
 function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProps) {
+  const baseUrl = window.location.origin;
+  const urls = {
+    home: `${baseUrl}/?coffee=${coffee.id}`,
+    detail: `${baseUrl}/?page=details&coffee=${coffee.id}`,
+    shop: `${baseUrl}/?page=shop&coffee=${coffee.id}`
+  };
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(`${label} URL이 클립보드에 복사되었습니다!`);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      alert('복사에 실패했습니다.');
+    }
+  };
+
   return (
     <div className={`border rounded-lg p-4 ${coffee.active ? 'border-gray-200' : 'border-gray-100 bg-gray-50'}`}>
       <div className="flex justify-between items-start mb-3">
@@ -49,6 +66,40 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
       <p className="text-sm text-text-muted mb-4 line-clamp-2">
         {coffee.masterComment}
       </p>
+
+      {/* URL 정보 섹션 */}
+      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+        <h4 className="text-sm font-medium text-text-primary mb-2">페이지 URL</h4>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-text-muted">Home:</span>
+            <button
+              onClick={() => copyToClipboard(urls.home, 'Home')}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              복사
+            </button>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-text-muted">Detail:</span>
+            <button
+              onClick={() => copyToClipboard(urls.detail, 'Detail')}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              복사
+            </button>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-text-muted">Shop:</span>
+            <button
+              onClick={() => copyToClipboard(urls.shop, 'Shop')}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              복사
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="flex gap-2">
         <button
