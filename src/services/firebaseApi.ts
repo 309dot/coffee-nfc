@@ -3,8 +3,8 @@ import {
   doc, 
   getDocs, 
   getDoc, 
-  addDoc, 
-  updateDoc, 
+  updateDoc,
+  setDoc,
   query, 
   where, 
   orderBy,
@@ -84,19 +84,12 @@ export const initializeData = async (): Promise<void> => {
       console.log('Initializing coffee data...');
       for (const coffeeData of initialCoffeeData) {
         const customId = generateCoffeeId(coffeeData.titleEn);
-        await updateDoc(doc(db, COFFEES_COLLECTION, customId), {
+        // setDoc을 사용해서 커스텀 ID로 확실히 문서 생성
+        await setDoc(doc(db, COFFEES_COLLECTION, customId), {
           id: customId,
           ...coffeeData,
           createdAt: new Date(),
           updatedAt: new Date()
-        }).catch(async () => {
-          // 문서가 없으면 생성
-          await addDoc(collection(db, COFFEES_COLLECTION), {
-            id: customId,
-            ...coffeeData,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
         });
       }
     }
@@ -196,10 +189,8 @@ export const firebaseApi = {
         updatedAt: new Date()
       };
       
-      await updateDoc(doc(db, COFFEES_COLLECTION, customId), newCoffee).catch(async () => {
-        // 문서가 없으면 생성
-        await addDoc(collection(db, COFFEES_COLLECTION), newCoffee);
-      });
+      // setDoc을 사용해서 커스텀 ID로 확실히 문서 생성
+      await setDoc(doc(db, COFFEES_COLLECTION, customId), newCoffee);
       
       return newCoffee as CoffeeApiData;
     } catch (error) {
@@ -211,7 +202,24 @@ export const firebaseApi = {
   // 커피 데이터 업데이트
   updateCoffee: async (id: string, updateData: Partial<CoffeeApiData>): Promise<CoffeeApiData | null> => {
     try {
-      const docRef = doc(db, COFFEES_COLLECTION, id);
+      // 먼저 실제 문서 ID 찾기
+      let docRef = doc(db, COFFEES_COLLECTION, id);
+      let docSnap = await getDoc(docRef);
+      
+      // 직접 ID로 찾지 못하면 id 필드로 쿼리
+      if (!docSnap.exists()) {
+        const q = query(collection(db, COFFEES_COLLECTION), where('id', '==', id));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          docRef = querySnapshot.docs[0].ref;
+          docSnap = querySnapshot.docs[0];
+        } else {
+          console.error(`Document with id ${id} not found`);
+          return null;
+        }
+      }
+      
       const updatedData = {
         ...updateData,
         updatedAt: new Date()
@@ -234,7 +242,23 @@ export const firebaseApi = {
   // 커피 삭제 (소프트 삭제)
   deleteCoffee: async (id: string): Promise<boolean> => {
     try {
-      const docRef = doc(db, COFFEES_COLLECTION, id);
+      // 먼저 실제 문서 ID 찾기
+      let docRef = doc(db, COFFEES_COLLECTION, id);
+      let docSnap = await getDoc(docRef);
+      
+      // 직접 ID로 찾지 못하면 id 필드로 쿼리
+      if (!docSnap.exists()) {
+        const q = query(collection(db, COFFEES_COLLECTION), where('id', '==', id));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          docRef = querySnapshot.docs[0].ref;
+        } else {
+          console.error(`Document with id ${id} not found`);
+          return false;
+        }
+      }
+      
       await updateDoc(docRef, { 
         active: false,
         updatedAt: new Date()
@@ -249,7 +273,23 @@ export const firebaseApi = {
   // 커피 활성화
   activateCoffee: async (id: string): Promise<boolean> => {
     try {
-      const docRef = doc(db, COFFEES_COLLECTION, id);
+      // 먼저 실제 문서 ID 찾기
+      let docRef = doc(db, COFFEES_COLLECTION, id);
+      let docSnap = await getDoc(docRef);
+      
+      // 직접 ID로 찾지 못하면 id 필드로 쿼리
+      if (!docSnap.exists()) {
+        const q = query(collection(db, COFFEES_COLLECTION), where('id', '==', id));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          docRef = querySnapshot.docs[0].ref;
+        } else {
+          console.error(`Document with id ${id} not found`);
+          return false;
+        }
+      }
+      
       await updateDoc(docRef, { 
         active: true,
         updatedAt: new Date()
