@@ -58,8 +58,8 @@ export function Calendar() {
   return (
     <div className="bg-white flex-1 flex flex-col overflow-y-auto">
       <div className="px-6 py-12 space-y-12">
-        {/* Header - Sticky but keeping original design */}
-        <div className="sticky top-16 z-40 bg-white space-y-2 shadow-sm pb-4">
+        {/* Header */}
+        <div className="space-y-2">
           <h1 className="text-2xl font-bold text-text-primary leading-tight">
             {coffee.titleKo}
           </h1>
