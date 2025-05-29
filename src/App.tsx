@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
-import { Calendar } from './pages/Calendar';
+import { Detail } from './pages/Detail';
 import { Shop } from './pages/Shop';
 import { Dashboard } from './pages/Dashboard';
 
@@ -45,7 +45,7 @@ function App() {
       case 'coffee-shop':
         return <Shop />;
       case 'details':
-        return <Calendar />;
+        return <Detail />;
       default:
         return <Home />;
     }

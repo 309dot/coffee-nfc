@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api, type CoffeeApiData } from '../services/api';
 
-export function Calendar() {
+export function Detail() {
   const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
   const [loading, setLoading] = useState(true);
 
