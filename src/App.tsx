@@ -21,11 +21,13 @@ function App() {
       return;
     }
     
-    // 기존 탭 시스템
-    const coffeeId = urlParams.get('coffee');
-    if (coffeeId) {
+    // 페이지 결정 로직
+    if (page === 'details') {
       setActiveTab('coffee-details');
+    } else if (page === 'calendar') {
+      setActiveTab('calendar');
     } else {
+      // 기본값: coffee 페이지 (coffee 파라미터가 있어도 Home 페이지)
       setActiveTab('coffee');
     }
   }, []);
