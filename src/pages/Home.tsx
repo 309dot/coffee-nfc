@@ -64,10 +64,10 @@ export function Home() {
   }
 
   return (
-    <div className="flex flex-col gap-1 min-h-screen">
-      {/* Title Section - Sticky */}
-      <section className="sticky top-16 z-40 bg-white rounded-b-2xl px-6 py-6 shadow-sm">
-        <div>
+    <div className="flex flex-col gap-1 min-h-screen justify-between">
+      {/* Title Section - Sticky but keeping original design */}
+      <section className="sticky top-16 z-40 bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center shadow-sm">
+        <div className="mb-auto">
           <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight">
             {coffee.titleKo}
           </h1>
@@ -77,7 +77,7 @@ export function Home() {
         </div>
         
         {/* Badges */}
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-2">
           {coffee.flavorNotes.map((note, index) => (
             <Badge key={index}>
               {note}
@@ -86,36 +86,33 @@ export function Home() {
         </div>
       </section>
 
-      {/* Content Area */}
-      <div className="flex flex-col gap-1 flex-1 px-1">
-        {/* Comment Card */}
-        <section className="rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
-          <div className="flex flex-col gap-2.5">
-            <p className="text-sm text-text-muted font-normal mb-2">
-              master comment
-            </p>
-            <p className="text-base font-bold text-text-primary">
-              "{coffee.masterComment}"
-            </p>
-          </div>
-        </section>
+      {/* Comment Card */}
+      <section className="rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
+        <div className="flex flex-col gap-2.5">
+          <p className="text-sm text-text-muted font-normal mb-2">
+            master comment
+          </p>
+          <p className="text-base font-bold text-text-primary">
+            "{coffee.masterComment}"
+          </p>
+        </div>
+      </section>
 
-        {/* CTA Section */}
-        <section className="rounded-2xl p-6" style={{ backgroundColor: '#FFBF8A' }}>
-          <div className="flex justify-between items-center gap-2">
-            {/* Logo */}
-            <M1CTLogo className="text-text-primary" />
-            
-            {/* Buy Button */}
-            <div className="flex items-center gap-2 px-4 py-2 border border-dark-navy rounded-full">
-              <span className="text-base font-bold text-text-primary">
-                buy whole bean
-              </span>
-              <ArrowRightIcon size={24} />
-            </div>
+      {/* CTA Section */}
+      <section className="rounded-2xl p-6" style={{ backgroundColor: '#FFBF8A' }}>
+        <div className="flex justify-between items-center gap-2">
+          {/* Logo */}
+          <M1CTLogo className="text-text-primary" />
+          
+          {/* Buy Button */}
+          <div className="flex items-center gap-2 px-4 py-2 border border-dark-navy rounded-full">
+            <span className="text-base font-bold text-text-primary">
+              buy whole bean
+            </span>
+            <ArrowRightIcon size={24} />
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 } 
