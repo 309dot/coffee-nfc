@@ -18,7 +18,7 @@ export function Navigation({ activeTab = 'coffee', onTabChange }: NavigationProp
   const visibleItems = navItems.filter(item => item.visible);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 p-6">
+    <div className="fixed bottom-0 left-0 right-0 z-40 p-6 flex justify-center">
       <div className="bg-dark-navy rounded-full shadow-lg">
         <div className="flex items-center justify-center px-2 py-2 gap-5">
           {visibleItems.map(({ id, icon: Icon, label }) => (
