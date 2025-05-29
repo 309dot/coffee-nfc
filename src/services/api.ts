@@ -1,20 +1,5 @@
 // Mock API 서비스
-
-export interface CoffeeData {
-  id: string;
-  name: string;
-  origin: string;
-  description: string;
-  farmer: string;
-  altitude: string;
-  processingMethod: string;
-  roastLevel: string;
-  harvestDate: string;
-  price: number;
-  badges: string[];
-  tastingNotes: string[];
-  active: boolean;
-}
+import type { CoffeeData } from '../types/coffee';
 
 export interface EventData {
   id: string;
@@ -28,22 +13,30 @@ export interface EventData {
   currentParticipants: number;
 }
 
+// 확장된 CoffeeData (API 전용)
+export interface CoffeeApiData extends CoffeeData {
+  id: string;
+  active: boolean;
+  price?: number;
+}
+
 // 임시 데이터
-const mockCoffeeData: CoffeeData[] = [
+const mockCoffeeData: CoffeeApiData[] = [
   {
     id: 'eth-001',
-    name: 'Addisu Hulichaye',
-    origin: 'Ethiopia',
-    description: '에티오피아 예가체프 지역의 특별한 원두로, 밝고 깔끔한 산미와 꽃향기가 특징입니다.',
-    farmer: 'Addisu Hulichaye',
+    titleKo: '에티오피아 예가체프',
+    titleEn: 'Ethiopia Yirgacheffe',
+    flavorNotes: ['플로럴', '시트러스', '차같은', '밝은'],
+    masterComment: '에티오피아 예가체프 지역의 특별한 원두로, 밝고 깔끔한 산미와 꽃향기가 특징입니다. 자연건조 방식으로 가공되어 과일 같은 단맛이 느껴집니다.',
+    country: '에티오피아',
+    farm: '고롤차 농장',
+    variety: '헤이룸, 쿠루메, 웰리초',
+    process: '내추럴',
+    region: '시다모, 예가체프',
     altitude: '2,100m',
-    processingMethod: 'Natural',
-    roastLevel: 'Light Medium',
-    harvestDate: '2024년 1월',
-    price: 28000,
-    badges: ['Single Origin', 'Natural Process', 'High Altitude'],
-    tastingNotes: ['Floral', 'Citrus', 'Tea-like', 'Bright'],
+    description: '에티오피아 예가체프는 커피의 원산지인 에티오피아에서 생산되는 최고급 아라비카 원두입니다. 높은 고도에서 자란 이 원두는 독특한 플로럴 향과 밝은 산미를 자랑하며, 자연건조 방식으로 가공되어 과일 같은 단맛과 복합적인 풍미를 선사합니다.',
     active: true,
+    price: 28000,
   },
 ];
 
@@ -75,14 +68,14 @@ const mockEvents: EventData[] = [
 // API 함수들
 export const api = {
   // 커피 데이터 가져오기
-  getCoffeeById: async (id: string): Promise<CoffeeData | null> => {
+  getCoffeeById: async (id: string): Promise<CoffeeApiData | null> => {
     // 실제 API 호출 시뮬레이션
     await new Promise(resolve => setTimeout(resolve, 300));
     return mockCoffeeData.find(coffee => coffee.id === id) || null;
   },
 
   // 모든 커피 데이터 가져오기
-  getAllCoffees: async (): Promise<CoffeeData[]> => {
+  getAllCoffees: async (): Promise<CoffeeApiData[]> => {
     // 실제 API 호출 시뮬레이션
     await new Promise(resolve => setTimeout(resolve, 500));
     return mockCoffeeData.filter(coffee => coffee.active);
@@ -106,7 +99,7 @@ export const api = {
   },
 
   // NFC 데이터로 커피 정보 가져오기
-  getCoffeeByNFC: async (nfcData: string): Promise<CoffeeData | null> => {
+  getCoffeeByNFC: async (nfcData: string): Promise<CoffeeApiData | null> => {
     await new Promise(resolve => setTimeout(resolve, 400));
     // NFC 데이터를 파싱하여 커피 ID 추출 (예시)
     const coffeeId = nfcData.includes('eth') ? 'eth-001' : 'col-001';

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { M1CTLogo, ArrowRightIcon } from '../components/icons';
-import { api, type CoffeeData } from '../services/api';
+import { api, type CoffeeApiData } from '../services/api';
 
 export function Home() {
-  const [coffee, setCoffee] = useState<CoffeeData | null>(null);
+  const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,18 +51,18 @@ export function Home() {
       <section className="bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center">
         <div className="mb-auto">
           <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight">
-            {coffee.name}
+            {coffee.titleKo}
           </h1>
           <p className="text-base font-light text-text-primary mt-2 tracking-tight">
-            {coffee.origin}
+            {coffee.titleEn}
           </p>
         </div>
         
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mt-2">
-          {coffee.badges.map((badge, index) => (
+          {coffee.flavorNotes.map((note, index) => (
             <Badge key={index}>
-              {badge}
+              {note}
             </Badge>
           ))}
         </div>
@@ -75,7 +75,7 @@ export function Home() {
             master comment
           </p>
           <p className="text-base font-bold text-text-primary">
-            "{coffee.description}"
+            "{coffee.masterComment}"
           </p>
         </div>
       </section>
