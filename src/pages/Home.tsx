@@ -64,9 +64,9 @@ export function Home() {
   }
 
   return (
-    <div className="flex flex-col gap-1 min-h-[500px]">
+    <div className="flex flex-col gap-1 min-h-screen">
       {/* Title Section */}
-      <section className="bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center max-h-[calc(100vh-280px)]">
+      <section className="bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center max-h-[calc(90vh-280px)]">
         <div className="mb-auto">
           <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight">
             {coffee.titleKo}
