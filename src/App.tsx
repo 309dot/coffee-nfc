@@ -53,10 +53,8 @@ function App() {
 
   const handleTabChange = (tab: string) => {
     const tabMapping: Record<string, Tab> = {
-      'home': 'coffee',
       'coffee': 'coffee',
-      'calendar': 'calendar',
-      'details': 'coffee-details'
+      'calendar': 'calendar'
     };
     
     const newTab = tabMapping[tab] || 'coffee';
@@ -66,9 +64,7 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const coffeeId = urlParams.get('coffee');
     
-    if (newTab === 'coffee-details') {
-      window.history.pushState({}, '', `/?page=details${coffeeId ? `&coffee=${coffeeId}` : ''}`);
-    } else if (newTab === 'calendar') {
+    if (newTab === 'calendar') {
       window.history.pushState({}, '', `/?page=calendar${coffeeId ? `&coffee=${coffeeId}` : ''}`);
     } else {
       window.history.pushState({}, '', `/${coffeeId ? `?coffee=${coffeeId}` : ''}`);

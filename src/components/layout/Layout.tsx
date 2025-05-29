@@ -16,7 +16,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
       <main className="flex-1 flex flex-col pt-4 pb-24">
         {children}
       </main>
-      <Navigation currentPage={currentPage as any} onPageChange={onPageChange as any} />
+      <Navigation activeTab={currentPage} onTabChange={onPageChange} />
     </div>
   );
 } 
