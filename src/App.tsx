@@ -1,67 +1,78 @@
-import { useEffect } from 'react';
-import { Layout } from './components/layout/Layout';
+import { useState, useEffect } from 'react';
+import { Navigation } from './components/ui/Navigation';
 import { Home } from './pages/Home';
-import { Details } from './pages/Details';
-import { Products } from './pages/Products';
-import { Menu } from './pages/Menu';
 import { Calendar } from './pages/Calendar';
-import { EditCoffee } from './pages/EditCoffee';
-import { useAppStore } from './store/useAppStore';
+import { Details } from './pages/Details';
+import { Dashboard } from './pages/Dashboard';
+
+type Page = 'home' | 'calendar' | 'details' | 'dashboard';
 
 function App() {
-  const { activeTab, setActiveTab, checkNFCSupport } = useAppStore();
+  const [currentPage, setCurrentPage] = useState<Page>('home');
 
   useEffect(() => {
-    // Check NFC support on app load
-    checkNFCSupport();
-    
-    // Check URL parameters for coffee ID and edit mode
+    // URL 파라미터를 읽어서 페이지 결정
     const urlParams = new URLSearchParams(window.location.search);
-    const coffeeId = urlParams.get('coffee');
-    const editMode = urlParams.get('edit');
+    const page = urlParams.get('page') as Page;
     
-    if (editMode) {
-      // If edit mode is enabled, show edit page
-      setActiveTab('coffee-edit');
-    } else if (coffeeId) {
-      // If coffee ID is provided, show details page
-      setActiveTab('coffee-details');
+    if (page && ['home', 'calendar', 'details', 'dashboard'].includes(page)) {
+      setCurrentPage(page);
+    } else {
+      // 기본값: home
+      setCurrentPage('home');
     }
-  }, [checkNFCSupport, setActiveTab]);
+  }, []);
 
-  const renderPage = () => {
+  const handlePageChange = (page: Page) => {
+    setCurrentPage(page);
+    
+    // URL 업데이트 (coffee 파라미터 유지)
     const urlParams = new URLSearchParams(window.location.search);
     const coffeeId = urlParams.get('coffee');
-    const editMode = urlParams.get('edit');
     
-    switch (activeTab) {
-      case 'coffee':
+    let newUrl = `/?page=${page}`;
+    if (coffeeId && page !== 'dashboard') {
+      newUrl += `&coffee=${coffeeId}`;
+    }
+    
+    window.history.pushState({}, '', newUrl);
+  };
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'home':
         return <Home />;
-      case 'coffee-details':
-        return <Details coffeeId={coffeeId || 'eth-001'} />;
-      case 'coffee-edit':
-        return <EditCoffee coffeeId={coffeeId || 'eth-001'} />;
       case 'calendar':
         return <Calendar />;
-      case 'store':
-        return <Products />;
-      case 'menu':
-        return <Menu />;
+      case 'details':
+        return <Details />;
+      case 'dashboard':
+        return <Dashboard />;
       default:
-        // Check URL parameters to decide default page
-        if (editMode) {
-          return <EditCoffee coffeeId={coffeeId || 'eth-001'} />;
-        } else if (coffeeId) {
-          return <Details coffeeId={coffeeId} />;
-        }
         return <Home />;
     }
   };
 
+  // 대시보드는 네비게이션 숨기기
+  const showNavigation = currentPage !== 'dashboard';
+
   return (
-    <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-      {renderPage()}
-    </Layout>
+    <div className="min-h-screen bg-app-background flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Main Content */}
+        <main className="flex-1 overflow-hidden">
+          {renderCurrentPage()}
+        </main>
+        
+        {/* Navigation - 대시보드에서는 숨김 */}
+        {showNavigation && (
+          <Navigation 
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
+      </div>
+    </div>
   );
 }
 
