@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { ArrowRightIcon } from '../components/icons';
-import { api, type CoffeeData } from '../services/api';
+import { api, type CoffeeApiData } from '../services/api';
 import { useAppStore } from '../store/useAppStore';
 import { analyticsService } from '../services/analytics';
 
@@ -10,7 +10,7 @@ interface DetailsProps {
 }
 
 export function Details({ coffeeId = 'eth-001' }: DetailsProps) {
-  const [coffee, setCoffee] = useState<CoffeeData | null>(null);
+  const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const { addToCart, addToFavorites, favorites } = useAppStore();
 
@@ -37,8 +37,8 @@ export function Details({ coffeeId = 'eth-001' }: DetailsProps) {
     if (coffee) {
       addToCart({
         id: coffee.id,
-        name: coffee.name,
-        price: coffee.price,
+        name: coffee.titleKo,
+        price: coffee.price || 0,
         quantity: 1,
       });
       alert('장바구니에 추가되었습니다!');
@@ -79,18 +79,18 @@ export function Details({ coffeeId = 'eth-001' }: DetailsProps) {
       <section className="px-6 pt-6">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-text-primary leading-tight">
-            {coffee.name}
+            {coffee.titleKo}
           </h1>
           <p className="text-base font-light text-text-primary mt-1">
-            {coffee.origin}
+            {coffee.titleEn}
           </p>
         </div>
         
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {coffee.badges.map((badge, index) => (
+          {coffee.flavorNotes.map((note: string, index: number) => (
             <Badge key={index}>
-              {badge}
+              {note}
             </Badge>
           ))}
         </div>
@@ -99,11 +99,11 @@ export function Details({ coffeeId = 'eth-001' }: DetailsProps) {
       {/* Coffee Details */}
       <section className="px-6 flex-1 overflow-y-auto">
         <div className="space-y-4">
-          {/* Description */}
+          {/* Master Comment */}
           <div className="bg-comment-bg rounded-2xl p-4">
-            <h3 className="font-bold text-text-primary mb-2">설명</h3>
+            <h3 className="font-bold text-text-primary mb-2">Master Comment</h3>
             <p className="text-text-primary text-sm">
-              {coffee.description}
+              {coffee.masterComment}
             </p>
           </div>
 
@@ -112,45 +112,44 @@ export function Details({ coffeeId = 'eth-001' }: DetailsProps) {
             <h3 className="font-bold text-text-primary mb-3">커피 정보</h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-text-muted">농부</p>
-                <p className="font-medium text-text-primary">{coffee.farmer}</p>
+                <p className="text-text-muted">나라</p>
+                <p className="font-medium text-text-primary">{coffee.country}</p>
+              </div>
+              <div>
+                <p className="text-text-muted">농장</p>
+                <p className="font-medium text-text-primary">{coffee.farm}</p>
+              </div>
+              <div>
+                <p className="text-text-muted">품종</p>
+                <p className="font-medium text-text-primary">{coffee.variety}</p>
+              </div>
+              <div>
+                <p className="text-text-muted">프로세스</p>
+                <p className="font-medium text-text-primary">{coffee.process}</p>
+              </div>
+              <div>
+                <p className="text-text-muted">지역</p>
+                <p className="font-medium text-text-primary">{coffee.region}</p>
               </div>
               <div>
                 <p className="text-text-muted">고도</p>
                 <p className="font-medium text-text-primary">{coffee.altitude}</p>
               </div>
-              <div>
-                <p className="text-text-muted">가공 방식</p>
-                <p className="font-medium text-text-primary">{coffee.processingMethod}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">로스팅</p>
-                <p className="font-medium text-text-primary">{coffee.roastLevel}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">수확 시기</p>
-                <p className="font-medium text-text-primary">{coffee.harvestDate}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">가격</p>
-                <p className="font-bold text-text-primary">₩{coffee.price.toLocaleString()}</p>
-              </div>
+              {coffee.price && (
+                <div>
+                  <p className="text-text-muted">가격</p>
+                  <p className="font-bold text-text-primary">₩{coffee.price.toLocaleString()}</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Tasting Notes */}
+          {/* Description */}
           <div className="bg-cta-bg rounded-2xl p-4">
-            <h3 className="font-bold text-text-primary mb-3">테이스팅 노트</h3>
-            <div className="flex flex-wrap gap-2">
-              {coffee.tastingNotes.map((note, index) => (
-                <span
-                  key={index}
-                  className="bg-white text-text-primary px-3 py-1 rounded-full text-sm font-medium"
-                >
-                  {note}
-                </span>
-              ))}
-            </div>
+            <h3 className="font-bold text-text-primary mb-3">원두 소개</h3>
+            <p className="text-text-primary text-sm leading-relaxed whitespace-pre-line">
+              {coffee.description}
+            </p>
           </div>
         </div>
       </section>
