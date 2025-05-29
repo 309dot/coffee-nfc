@@ -1,5 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('./assets/PretendardVariable.woff2') format('woff2-variations');
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   --color-dark-navy: #0B0C0E;
@@ -10,7 +17,7 @@
   --color-cta-bg: #8AE0FF;
   --color-text-muted: rgba(15, 19, 36, 0.6);
   
-  --font-family-inter: Inter, sans-serif;
+  --font-family-pretendard: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
 }
 
 /* Line clamp utilities */

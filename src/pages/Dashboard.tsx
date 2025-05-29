@@ -69,35 +69,26 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
 
       {/* URL 정보 섹션 */}
       <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-        <h4 className="text-sm font-medium text-text-primary mb-2">페이지 URL</h4>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-text-muted">Home:</span>
-            <button
-              onClick={() => copyToClipboard(urls.home, 'Home')}
-              className="text-xs text-blue-600 hover:text-blue-800 underline"
-            >
-              복사
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-text-muted">Detail:</span>
-            <button
-              onClick={() => copyToClipboard(urls.detail, 'Detail')}
-              className="text-xs text-blue-600 hover:text-blue-800 underline"
-            >
-              복사
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-text-muted">Shop:</span>
-            <button
-              onClick={() => copyToClipboard(urls.shop, 'Shop')}
-              className="text-xs text-blue-600 hover:text-blue-800 underline"
-            >
-              복사
-            </button>
-          </div>
+        <h4 className="text-sm font-medium text-text-primary mb-3">페이지 URL</h4>
+        <div className="flex gap-2">
+          <button
+            onClick={() => copyToClipboard(urls.home, 'Home')}
+            className="flex-1 py-2 px-3 bg-blue-100 text-blue-800 rounded-lg text-xs font-medium hover:bg-blue-200 transition-colors"
+          >
+            Home URL 복사
+          </button>
+          <button
+            onClick={() => copyToClipboard(urls.detail, 'Detail')}
+            className="flex-1 py-2 px-3 bg-green-100 text-green-800 rounded-lg text-xs font-medium hover:bg-green-200 transition-colors"
+          >
+            Detail URL 복사
+          </button>
+          <button
+            onClick={() => copyToClipboard(urls.shop, 'Shop')}
+            className="flex-1 py-2 px-3 bg-purple-100 text-purple-800 rounded-lg text-xs font-medium hover:bg-purple-200 transition-colors"
+          >
+            Shop URL 복사
+          </button>
         </div>
       </div>
 
@@ -473,11 +464,38 @@ export function Dashboard() {
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">품종</label>
+                    <input
+                      type="text"
+                      value={formData.variety}
+                      onChange={(e) => handleInputChange('variety', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    />
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">프로세스</label>
                     <input
                       type="text"
                       value={formData.process}
                       onChange={(e) => handleInputChange('process', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">지역</label>
+                    <input
+                      type="text"
+                      value={formData.region}
+                      onChange={(e) => handleInputChange('region', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">고도</label>
+                    <input
+                      type="text"
+                      value={formData.altitude}
+                      onChange={(e) => handleInputChange('altitude', e.target.value)}
                       className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
                     />
                   </div>
@@ -490,6 +508,19 @@ export function Dashboard() {
                       className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1">
+                    상세 설명
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    placeholder="원두에 대한 상세한 설명을 입력해주세요"
+                  />
                 </div>
               </div>
 
