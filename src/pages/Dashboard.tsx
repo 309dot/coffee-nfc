@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { api, type CoffeeApiData } from '../services/api';
+import { firebaseApi } from '../services/firebaseApi';
 
 interface CoffeeCardProps {
   coffee: CoffeeApiData;
@@ -142,21 +143,22 @@ export function Dashboard() {
   });
   const [flavorNoteInput, setFlavorNoteInput] = useState('');
 
-  // 데이터 로딩
-  const loadCoffees = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getAllCoffeesAdmin();
-      setCoffees(data);
-    } catch (error) {
-      console.error('Error loading coffees:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Firebase 실시간 데이터 구독
   useEffect(() => {
-    loadCoffees();
+    console.log('Setting up Firebase subscription...');
+    
+    // 실시간 구독 설정
+    const unsubscribe = firebaseApi.subscribeToCoffees((updatedCoffees) => {
+      console.log('Received updated coffees:', updatedCoffees);
+      setCoffees(updatedCoffees);
+      setLoading(false);
+    });
+
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      console.log('Unsubscribing from Firebase...');
+      unsubscribe();
+    };
   }, []);
 
   // 폼 관련 함수들
@@ -233,7 +235,8 @@ export function Dashboard() {
     if (confirm('정말로 이 원두를 삭제하시겠습니까?')) {
       try {
         await api.deleteCoffee(id);
-        loadCoffees();
+        // 실시간 구독으로 자동 업데이트됨
+        alert('원두가 삭제되었습니다.');
       } catch (error) {
         console.error('Error deleting coffee:', error);
         alert('삭제 중 오류가 발생했습니다.');
@@ -248,7 +251,7 @@ export function Dashboard() {
       } else {
         await api.deleteCoffee(id);
       }
-      loadCoffees();
+      // 실시간 구독으로 자동 업데이트됨
     } catch (error) {
       console.error('Error toggling coffee status:', error);
       alert('상태 변경 중 오류가 발생했습니다.');
@@ -266,7 +269,7 @@ export function Dashboard() {
         await api.createCoffee(formData);
         alert('새 원두가 추가되었습니다.');
       }
-      loadCoffees();
+      // 실시간 구독으로 자동 업데이트됨
       resetForm();
     } catch (error) {
       console.error('Error saving coffee:', error);
