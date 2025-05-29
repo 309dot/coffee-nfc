@@ -20,7 +20,7 @@ export function Navigation({ activeTab = 'coffee', onTabChange }: NavigationProp
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 p-6">
       <div className="bg-dark-navy rounded-full shadow-lg">
-        <div className="flex justify-between items-center px-2 py-2 gap-5">
+        <div className="flex items-center justify-center px-2 py-2 gap-5">
           {visibleItems.map(({ id, icon: Icon, label }) => (
             <button
               key={id}
