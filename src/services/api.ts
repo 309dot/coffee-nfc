@@ -81,6 +81,26 @@ export const api = {
     return mockCoffeeData.filter(coffee => coffee.active);
   },
 
+  // 커피 데이터 업데이트
+  updateCoffee: async (id: string, updateData: Partial<CoffeeApiData>): Promise<CoffeeApiData | null> => {
+    // 실제 API 호출 시뮬레이션
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    const coffeeIndex = mockCoffeeData.findIndex(coffee => coffee.id === id);
+    if (coffeeIndex === -1) {
+      return null;
+    }
+    
+    // 데이터 업데이트
+    mockCoffeeData[coffeeIndex] = {
+      ...mockCoffeeData[coffeeIndex],
+      ...updateData,
+      id, // ID는 변경되지 않도록 보장
+    };
+    
+    return mockCoffeeData[coffeeIndex];
+  },
+
   // 이벤트 데이터 가져오기
   getEvents: async (): Promise<EventData[]> => {
     await new Promise(resolve => setTimeout(resolve, 300));
