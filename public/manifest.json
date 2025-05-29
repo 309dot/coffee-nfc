@@ -4,8 +4,8 @@
   "description": "M1CT의 스페셜티 커피 정보와 맛 노트를 확인해보세요",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F5DC",
-  "theme_color": "#F5F5DC",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "orientation": "portrait",
   "icons": [
     {
