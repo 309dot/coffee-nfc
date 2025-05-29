@@ -87,7 +87,7 @@ export function Home() {
       </section>
 
       {/* Comment Card */}
-      <section className="bg-comment-bg rounded-2xl p-6">
+      <section className="rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
         <div className="flex flex-col gap-2.5">
           <p className="text-sm text-text-muted font-normal mb-2">
             master comment
@@ -99,7 +99,7 @@ export function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-cta-bg rounded-2xl p-6">
+      <section className="rounded-2xl p-6" style={{ backgroundColor: '#FFBF8A' }}>
         <div className="flex justify-between items-center gap-2">
           {/* Logo */}
           <M1CTLogo className="text-text-primary" />
