@@ -380,25 +380,28 @@ export function Dashboard() {
 
   // 필터링 및 정렬된 데이터 계산
   const filteredAndSortedCoffees = useMemo(() => {
-    let filtered = coffees.filter(coffee => {
-      // 상태 필터
-      if (coffeeFilter === 'active' && !coffee.active) return false;
-      if (coffeeFilter === 'inactive' && coffee.active) return false;
-      
-      // 검색 필터
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        return coffee.titleKo.toLowerCase().includes(term) ||
-               coffee.titleEn.toLowerCase().includes(term) ||
-               coffee.country?.toLowerCase().includes(term) ||
-               coffee.flavorNotes?.some(note => note.toLowerCase().includes(term));
-      }
-      
-      return true;
-    });
+    // 1단계: 검색 필터 적용
+    let searchFiltered = coffees;
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      searchFiltered = coffees.filter(coffee => 
+        coffee.titleKo.toLowerCase().includes(term) ||
+        coffee.titleEn.toLowerCase().includes(term) ||
+        coffee.country?.toLowerCase().includes(term) ||
+        coffee.flavorNotes?.some(note => note.toLowerCase().includes(term))
+      );
+    }
 
-    // 정렬
-    filtered.sort((a, b) => {
+    // 2단계: 상태 필터 적용
+    let statusFiltered = searchFiltered;
+    if (coffeeFilter === 'active') {
+      statusFiltered = searchFiltered.filter(coffee => coffee.active);
+    } else if (coffeeFilter === 'inactive') {
+      statusFiltered = searchFiltered.filter(coffee => !coffee.active);
+    }
+
+    // 3단계: 정렬 적용
+    const sorted = [...statusFiltered].sort((a, b) => {
       switch (coffeeSort) {
         case 'newest':
           return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
@@ -413,28 +416,31 @@ export function Dashboard() {
       }
     });
 
-    return filtered;
-  }, [coffees, coffeeFilter, coffeeSort, searchTerm]);
+    return sorted;
+  }, [coffees, searchTerm, coffeeFilter, coffeeSort]);
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products.filter(product => {
-      // 상태 필터
-      if (productFilter === 'active' && !product.active) return false;
-      if (productFilter === 'inactive' && product.active) return false;
-      
-      // 검색 필터
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        return product.titleKo.toLowerCase().includes(term) ||
-               product.titleEn?.toLowerCase().includes(term) ||
-               product.category.toLowerCase().includes(term);
-      }
-      
-      return true;
-    });
+    // 1단계: 검색 필터 적용
+    let searchFiltered = products;
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      searchFiltered = products.filter(product => 
+        product.titleKo.toLowerCase().includes(term) ||
+        product.titleEn?.toLowerCase().includes(term) ||
+        product.category.toLowerCase().includes(term)
+      );
+    }
 
-    // 정렬
-    filtered.sort((a, b) => {
+    // 2단계: 상태 필터 적용
+    let statusFiltered = searchFiltered;
+    if (productFilter === 'active') {
+      statusFiltered = searchFiltered.filter(product => product.active);
+    } else if (productFilter === 'inactive') {
+      statusFiltered = searchFiltered.filter(product => !product.active);
+    }
+
+    // 3단계: 정렬 적용
+    const sorted = [...statusFiltered].sort((a, b) => {
       switch (productSort) {
         case 'newest':
           return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
@@ -451,8 +457,34 @@ export function Dashboard() {
       }
     });
 
-    return filtered;
-  }, [products, productFilter, productSort, searchTerm]);
+    return sorted;
+  }, [products, searchTerm, productFilter, productSort]);
+
+  // 개별 초기화 함수들
+  const resetSearch = () => setSearchTerm('');
+  const resetStatusFilter = () => {
+    if (activeTab === 'coffee') {
+      setCoffeeFilter('all');
+    } else {
+      setProductFilter('all');
+    }
+  };
+  const resetSort = () => {
+    if (activeTab === 'coffee') {
+      setCoffeeSort('newest');
+    } else {
+      setProductSort('newest');
+    }
+  };
+
+  // 현재 활성화된 필터 개수 계산
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (searchTerm) count++;
+    if ((activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all') count++;
+    if ((activeTab === 'coffee' ? coffeeSort : productSort) !== 'newest') count++;
+    return count;
+  };
 
   // 폼 관련 함수들
   const handleInputChange = (field: string, value: string | number | boolean) => {
@@ -726,82 +758,246 @@ export function Dashboard() {
 
         {/* Filter and Sort Controls - 풍미노트 탭에서는 숨김 */}
         {activeTab !== 'flavorNotes' && (
-          <div className="bg-white p-4 rounded-xl border space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* 검색 */}
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">검색</label>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder={`${activeTab === 'coffee' ? '커피명, 원산지, 풍미노트' : '상품명, 카테고리'}로 검색...`}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                />
+          <div className="space-y-4">
+            {/* 검색 */}
+            <div className="bg-white p-4 rounded-xl border">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder={`${activeTab === 'coffee' ? '커피명, 원산지, 풍미노트' : '상품명, 카테고리'}로 검색...`}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-text-primary focus:border-text-primary transition-colors"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {searchTerm && (
+                  <button
+                    onClick={resetSearch}
+                    className="px-4 py-3 text-text-muted hover:text-text-primary transition-colors"
+                    title="검색 초기화"
+                  >
+                    <Icons.Close className="w-5 h-5" />
+                  </button>
+                )}
               </div>
+              {searchTerm && (
+                <div className="mt-3 text-sm text-gray-600">
+                  "{searchTerm}" 검색 결과: {activeTab === 'coffee' ? filteredAndSortedCoffees.length : filteredAndSortedProducts.length}개
+                </div>
+              )}
+            </div>
 
-              {/* 필터 */}
-              <div className="sm:w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">상태 필터</label>
-                <select
-                  value={activeTab === 'coffee' ? coffeeFilter : productFilter}
-                  onChange={(e) => activeTab === 'coffee' 
-                    ? setCoffeeFilter(e.target.value as 'all' | 'active' | 'inactive')
-                    : setProductFilter(e.target.value as 'all' | 'active' | 'inactive')
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                >
-                  <option value="all">전체</option>
-                  <option value="active">활성</option>
-                  <option value="inactive">비활성</option>
-                </select>
+            {/* 필터 및 정렬 */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* 상태 필터 */}
+              <div className="bg-white p-4 rounded-xl border flex-1">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-medium text-gray-700">상태 필터</h3>
+                  {(activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all' && (
+                    <button
+                      onClick={resetStatusFilter}
+                      className="text-xs text-text-primary hover:underline"
+                    >
+                      초기화
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {['all', 'active', 'inactive'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        if (activeTab === 'coffee') {
+                          setCoffeeFilter(status as 'all' | 'active' | 'inactive');
+                        } else {
+                          setProductFilter(status as 'all' | 'active' | 'inactive');
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        (activeTab === 'coffee' ? coffeeFilter : productFilter) === status
+                          ? 'bg-text-primary text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {status === 'all' ? '전체' : status === 'active' ? '활성' : '비활성'}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  {(activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all' ? (
+                    <span className="text-text-primary font-medium">
+                      {(activeTab === 'coffee' ? coffeeFilter : productFilter) === 'active' ? '활성' : '비활성'} 상태만 표시 중
+                    </span>
+                  ) : (
+                    '모든 상태 표시 중'
+                  )}
+                </div>
               </div>
 
               {/* 정렬 */}
-              <div className="sm:w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">정렬</label>
-                <select
-                  value={activeTab === 'coffee' ? coffeeSort : productSort}
-                  onChange={(e) => activeTab === 'coffee' 
-                    ? setCoffeeSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price')
-                    : setProductSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price' | 'category')
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                >
-                  <option value="newest">최신순</option>
-                  <option value="oldest">오래된순</option>
-                  <option value="name">이름순</option>
-                  <option value="price">가격순</option>
-                  {activeTab === 'products' && (
-                    <option value="category">카테고리순</option>
+              <div className="bg-white p-4 rounded-xl border flex-1">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-medium text-gray-700">정렬</h3>
+                  {(activeTab === 'coffee' ? coffeeSort : productSort) !== 'newest' && (
+                    <button
+                      onClick={resetSort}
+                      className="text-xs text-text-primary hover:underline"
+                    >
+                      초기화
+                    </button>
                   )}
-                </select>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(activeTab === 'coffee' 
+                    ? [
+                        { value: 'newest', label: '최신순' },
+                        { value: 'oldest', label: '오래된순' },
+                        { value: 'name', label: '이름순' },
+                        { value: 'price', label: '가격순' }
+                      ]
+                    : [
+                        { value: 'newest', label: '최신순' },
+                        { value: 'oldest', label: '오래된순' },
+                        { value: 'name', label: '이름순' },
+                        { value: 'price', label: '가격순' },
+                        { value: 'category', label: '카테고리순' }
+                      ]
+                  ).map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        if (activeTab === 'coffee') {
+                          setCoffeeSort(option.value as 'newest' | 'oldest' | 'name' | 'price');
+                        } else {
+                          setProductSort(option.value as 'newest' | 'oldest' | 'name' | 'price' | 'category');
+                        }
+                      }}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        (activeTab === 'coffee' ? coffeeSort : productSort) === option.value
+                          ? 'bg-text-primary text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  <span className="text-text-primary font-medium">
+                    현재 정렬: {(activeTab === 'coffee' 
+                      ? [
+                          { value: 'newest', label: '최신순' },
+                          { value: 'oldest', label: '오래된순' },
+                          { value: 'name', label: '이름순' },
+                          { value: 'price', label: '가격순' }
+                        ]
+                      : [
+                          { value: 'newest', label: '최신순' },
+                          { value: 'oldest', label: '오래된순' },
+                          { value: 'name', label: '이름순' },
+                          { value: 'price', label: '가격순' },
+                          { value: 'category', label: '카테고리순' }
+                        ]
+                    ).find(option => option.value === (activeTab === 'coffee' ? coffeeSort : productSort))?.label}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* 결과 요약 */}
-            <div className="flex justify-between items-center text-sm text-gray-600">
-              <div>
-                총 {activeTab === 'coffee' ? filteredAndSortedCoffees.length : filteredAndSortedProducts.length}개 
-                {searchTerm && ` (검색: "${searchTerm}")`}
-                {(activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all' && 
-                  ` (${(activeTab === 'coffee' ? coffeeFilter : productFilter) === 'active' ? '활성' : '비활성'})`
-                }
+            {/* 전체 결과 요약 및 초기화 */}
+            <div className="bg-gray-50 p-4 rounded-xl">
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-700">
+                  <span className="font-medium text-lg">
+                    {activeTab === 'coffee' ? filteredAndSortedCoffees.length : filteredAndSortedProducts.length}개
+                  </span>
+                  <span className="ml-1">
+                    {activeTab === 'coffee' ? '커피' : '상품'}
+                  </span>
+                  <span className="text-gray-500 ml-1">
+                    / 전체 {activeTab === 'coffee' ? coffees.length : products.length}개
+                  </span>
+                  {getActiveFiltersCount() > 0 && (
+                    <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-text-primary text-white">
+                      {getActiveFiltersCount()}개 필터 적용
+                    </span>
+                  )}
+                </div>
+                {getActiveFiltersCount() > 0 && (
+                  <button
+                    onClick={() => {
+                      resetSearch();
+                      resetStatusFilter();
+                      resetSort();
+                    }}
+                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm"
+                  >
+                    모든 필터 초기화
+                  </button>
+                )}
               </div>
-              {(searchTerm || (activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all') && (
-                <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    if (activeTab === 'coffee') {
-                      setCoffeeFilter('all');
-                    } else {
-                      setProductFilter('all');
-                    }
-                  }}
-                  className="text-text-primary hover:underline"
-                >
-                  필터 초기화
-                </button>
+              
+              {/* 활성 필터 상세 표시 */}
+              {getActiveFiltersCount() > 0 && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {searchTerm && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-100 text-blue-800">
+                        검색: "{searchTerm}"
+                        <button
+                          onClick={resetSearch}
+                          className="ml-1 hover:text-blue-900"
+                        >
+                          <Icons.Close className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    {(activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all' && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-100 text-green-800">
+                        상태: {(activeTab === 'coffee' ? coffeeFilter : productFilter) === 'active' ? '활성' : '비활성'}
+                        <button
+                          onClick={resetStatusFilter}
+                          className="ml-1 hover:text-green-900"
+                        >
+                          <Icons.Close className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    {(activeTab === 'coffee' ? coffeeSort : productSort) !== 'newest' && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-purple-100 text-purple-800">
+                        정렬: {(activeTab === 'coffee' 
+                          ? [
+                              { value: 'newest', label: '최신순' },
+                              { value: 'oldest', label: '오래된순' },
+                              { value: 'name', label: '이름순' },
+                              { value: 'price', label: '가격순' }
+                            ]
+                          : [
+                              { value: 'newest', label: '최신순' },
+                              { value: 'oldest', label: '오래된순' },
+                              { value: 'name', label: '이름순' },
+                              { value: 'price', label: '가격순' },
+                              { value: 'category', label: '카테고리순' }
+                            ]
+                        ).find(option => option.value === (activeTab === 'coffee' ? coffeeSort : productSort))?.label}
+                        <button
+                          onClick={resetSort}
+                          className="ml-1 hover:text-purple-900"
+                        >
+                          <Icons.Close className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           </div>
