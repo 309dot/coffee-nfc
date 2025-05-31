@@ -4,12 +4,11 @@ import { M1CTLogo, InstagramIcon, GlobeIcon } from '../components/icons';
 import { api, type CoffeeApiData } from '../services/api';
 
 interface ProductModalProps {
-  product: CoffeeApiData;
   isOpen: boolean;
   onClose: () => void;
 }
 
-function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
+function ProductModal({ isOpen, onClose }: ProductModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -75,7 +74,6 @@ function ShopCard({ product, onClick }: ShopCardProps) {
 
 export function Shop() {
   const [products, setProducts] = useState<CoffeeApiData[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<CoffeeApiData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -97,14 +95,12 @@ export function Shop() {
     loadProducts();
   }, []);
 
-  const handleProductClick = (product: CoffeeApiData) => {
-    setSelectedProduct(product);
+  const handleProductClick = () => {
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedProduct(null);
   };
 
   if (loading) {
@@ -145,7 +141,7 @@ export function Shop() {
                 <ShopCard
                   key={product.id}
                   product={product}
-                  onClick={() => handleProductClick(product)}
+                  onClick={() => handleProductClick()}
                 />
               ))}
             </div>
@@ -161,13 +157,10 @@ export function Shop() {
       </div>
 
       {/* Product Modal */}
-      {selectedProduct && (
-        <ProductModal
-          product={selectedProduct}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
-      )}
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </>
   );
 } 
