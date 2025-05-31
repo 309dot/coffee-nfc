@@ -1,11 +1,7 @@
 const CACHE_NAME = 'm1ct-coffee-v1';
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/favicon.svg',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
   '/manifest.json'
 ];
 
