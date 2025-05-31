@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { productApi } from '../services/api';
+import { firebaseApi } from '../services/firebaseApi';
 import type { Product } from '../types';
 
 interface ProductCardProps {
@@ -163,74 +163,15 @@ export function ProductDashboard() {
     active: true
   });
 
-  // Load products
+  // Firebase 실시간 데이터 구독
   useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const productsData = await productApi.getAllProducts();
-      
-      // 초기 데이터가 없으면 샘플 데이터 추가
-      if (productsData.length === 0) {
-        const sampleProducts = [
-          {
-            category: '드립백',
-            titleKo: '에티오피아 예가체프 드립백',
-            titleEn: 'Ethiopia Yirgacheffe Drip Bag',
-            price: 12000,
-            description: '과일향이 풍부한 에티오피아 스페셜티 원두를 편리한 드립백으로 만나보세요.',
-            imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop',
-            active: true
-          },
-          {
-            category: '원두',
-            titleKo: '콜롬비아 후일라',
-            titleEn: 'Colombia Huila',
-            price: 28000,
-            description: '달콤하고 부드러운 맛의 콜롬비아 스페셜티 원두입니다.',
-            imageUrl: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=400&h=300&fit=crop',
-            active: true
-          },
-          {
-            category: '굿즈',
-            titleKo: 'M1CT 텀블러',
-            titleEn: 'M1CT Tumbler',
-            price: 18000,
-            description: '매장 로고가 새겨진 스테인리스 텀블러입니다.',
-            imageUrl: 'https://images.unsplash.com/photo-1554048612-b6a482b224ec?w=400&h=300&fit=crop',
-            active: true
-          },
-          {
-            category: '디저트',
-            titleKo: '수제 마들렌',
-            titleEn: 'Handmade Madeleines',
-            price: 8000,
-            description: '커피와 완벽한 조화를 이루는 수제 마들렌입니다.',
-            imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop',
-            active: true
-          }
-        ];
-
-        // 샘플 데이터 추가
-        for (const product of sampleProducts) {
-          await productApi.createProduct(product);
-        }
-        
-        // 다시 로드
-        const updatedProducts = await productApi.getAllProducts();
-        setProducts(updatedProducts);
-      } else {
-        setProducts(productsData);
-      }
-    } catch (error) {
-      console.error('Error loading products:', error);
-    } finally {
+    const unsubscribe = firebaseApi.subscribeToProducts((updatedProducts) => {
+      setProducts(updatedProducts);
       setLoading(false);
-    }
-  };
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -270,7 +211,7 @@ export function ProductDashboard() {
   const handleDelete = async (id: string) => {
     if (window.confirm('정말로 이 상품을 삭제하시겠습니까?')) {
       try {
-        await productApi.deleteProduct(id);
+        await firebaseApi.deleteProduct(id);
         setProducts(prev => prev.filter(p => p.id !== id));
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -281,7 +222,7 @@ export function ProductDashboard() {
 
   const handleToggleActive = async (id: string, active: boolean) => {
     try {
-      const updatedProduct = await productApi.toggleProductActive(id, active);
+      const updatedProduct = await firebaseApi.toggleProductActive(id, active);
       if (updatedProduct) {
         setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
       }
@@ -308,13 +249,13 @@ export function ProductDashboard() {
     try {
       if (editingProduct) {
         // 업데이트
-        const updatedProduct = await productApi.updateProduct(editingProduct.id, formData);
+        const updatedProduct = await firebaseApi.updateProduct(editingProduct.id, formData);
         if (updatedProduct) {
           setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
         }
       } else {
         // 새로 생성
-        const newProduct = await productApi.createProduct(formData);
+        const newProduct = await firebaseApi.createProduct(formData);
         setProducts(prev => [...prev, newProduct]);
       }
       resetForm();

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { productApi } from '../services/api';
+import { firebaseApi } from '../services/firebaseApi';
 import type { Product } from '../types';
 
 interface ProductModalProps {
@@ -117,7 +117,7 @@ export function Shop() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const productsData = await productApi.getAllProducts();
+      const productsData = await firebaseApi.getAllProducts();
       // 활성 상품만 표시
       setProducts(productsData.filter(product => product.active));
     } catch (error) {
