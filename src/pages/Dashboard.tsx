@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { Toast, useToast } from '../components/ui/Toast';
+import { FlavorNoteManager } from '../components/FlavorNoteManager';
 import type { CoffeeApiData } from '../services/api';
 import { firebaseApi } from '../services/firebaseApi';
 import type { Product } from '../types';
@@ -286,7 +287,7 @@ export function Dashboard() {
   const [coffees, setCoffees] = useState<CoffeeApiData[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'coffee' | 'products'>('coffee');
+  const [activeTab, setActiveTab] = useState<'coffee' | 'products' | 'flavorNotes'>('coffee');
   const [showForm, setShowForm] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingCoffee, setEditingCoffee] = useState<CoffeeApiData | null>(null);
@@ -567,7 +568,7 @@ export function Dashboard() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">관리 대시보드</h1>
-            <p className="text-text-muted">커피와 상품을 통합 관리하세요</p>
+            <p className="text-text-muted">커피, 상품, 풍미노트를 통합 관리하세요</p>
           </div>
         </div>
 
@@ -595,48 +596,67 @@ export function Dashboard() {
             <Icons.Shop className="w-4 h-4" />
             상품 관리
           </button>
-        </div>
-
-        {/* Add Button */}
-        <div className="flex justify-end">
           <button
-            onClick={() => activeTab === 'coffee' ? setShowForm(true) : setShowProductForm(true)}
-            className="flex items-center gap-2 px-4 py-3 bg-text-primary text-white rounded-xl hover:bg-text-primary/90 transition-colors"
+            onClick={() => setActiveTab('flavorNotes')}
+            className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors flex-1 justify-center ${
+              activeTab === 'flavorNotes'
+                ? 'bg-white text-text-primary shadow-sm'
+                : 'text-text-muted hover:text-text-primary'
+            }`}
           >
-            <Icons.Add className="w-5 h-5" />
-            새 {activeTab === 'coffee' ? '커피' : '상품'} 추가
+            🌟
+            풍미노트 관리
           </button>
         </div>
 
+        {/* Add Button - 풍미노트 탭에서는 숨김 */}
+        {activeTab !== 'flavorNotes' && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => activeTab === 'coffee' ? setShowForm(true) : setShowProductForm(true)}
+              className="flex items-center gap-2 px-4 py-3 bg-text-primary text-white rounded-xl hover:bg-text-primary/90 transition-colors"
+            >
+              <Icons.Add className="w-5 h-5" />
+              새 {activeTab === 'coffee' ? '커피' : '상품'} 추가
+            </button>
+          </div>
+        )}
+
         {/* Content */}
         <div className="space-y-6">
-          {(activeTab === 'coffee' ? coffees : products).length === 0 ? (
-            <div className="text-center py-12 text-text-muted">
-              <div className="text-4xl mb-4">{activeTab === 'coffee' ? '☕' : '🏪'}</div>
-              <p className="text-lg">등록된 {activeTab === 'coffee' ? '커피' : '상품'}가 없습니다.</p>
-              <p className="text-sm">새 {activeTab === 'coffee' ? '커피' : '상품'}를 추가해보세요!</p>
-            </div>
+          {activeTab === 'flavorNotes' ? (
+            <FlavorNoteManager />
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {activeTab === 'coffee' && coffees.map((coffee) => (
-                <CoffeeCard
-                  key={coffee.id}
-                  coffee={coffee}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onToggleActive={handleToggleActive}
-                />
-              ))}
-              {activeTab === 'products' && products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onEdit={handleProductEdit}
-                  onDelete={handleProductDelete}
-                  onToggleActive={handleProductToggleActive}
-                />
-              ))}
-            </div>
+            <>
+              {(activeTab === 'coffee' ? coffees : products).length === 0 ? (
+                <div className="text-center py-12 text-text-muted">
+                  <div className="text-4xl mb-4">{activeTab === 'coffee' ? '☕' : '🏪'}</div>
+                  <p className="text-lg">등록된 {activeTab === 'coffee' ? '커피' : '상품'}가 없습니다.</p>
+                  <p className="text-sm">새 {activeTab === 'coffee' ? '커피' : '상품'}를 추가해보세요!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {activeTab === 'coffee' && coffees.map((coffee) => (
+                    <CoffeeCard
+                      key={coffee.id}
+                      coffee={coffee}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onToggleActive={handleToggleActive}
+                    />
+                  ))}
+                  {activeTab === 'products' && products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onEdit={handleProductEdit}
+                      onDelete={handleProductDelete}
+                      onToggleActive={handleProductToggleActive}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -962,15 +982,56 @@ export function Dashboard() {
 
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-1">
-                    이미지 URL
+                    이미지 업로드
                   </label>
-                  <input
-                    type="url"
-                    value={productFormData.imageUrl}
-                    onChange={(e) => handleProductInputChange('imageUrl', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <div className="space-y-3">
+                    {/* 파일 업로드 */}
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const result = event.target?.result as string;
+                              handleProductInputChange('imageUrl', result);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">또는 아래에 이미지 URL을 직접 입력하세요</p>
+                    </div>
+                    
+                    {/* URL 입력 */}
+                    <div>
+                      <input
+                        type="url"
+                        value={productFormData.imageUrl}
+                        onChange={(e) => handleProductInputChange('imageUrl', e.target.value)}
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+                    
+                    {/* 미리보기 */}
+                    {productFormData.imageUrl && (
+                      <div className="mt-2">
+                        <img
+                          src={productFormData.imageUrl}
+                          alt="미리보기"
+                          className="w-32 h-32 object-cover rounded-lg border"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
