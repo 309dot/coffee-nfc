@@ -59,10 +59,33 @@ const Icons = {
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
+  ),
+  Copy: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  ),
+  Link: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+    </svg>
   )
 };
 
 function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProps) {
+  const baseUrl = window.location.origin;
+  const homeUrl = `${baseUrl}/?coffee=${coffee.id}`;
+
+  const copyHomeUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(homeUrl);
+      alert('홈 URL이 클립보드에 복사되었습니다!');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      alert('복사에 실패했습니다.');
+    }
+  };
+
   return (
     <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
       coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
@@ -95,18 +118,25 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
       </div>
 
       <div className="flex flex-wrap gap-1 mb-3">
-        {coffee.flavorNotes.slice(0, 3).map((note, index) => (
+        {coffee.flavorNotes.slice(0, 2).map((note, index) => (
           <Badge key={index} className="text-xs">
             {note}
           </Badge>
         ))}
-        {coffee.flavorNotes.length > 3 && (
-          <span className="text-xs text-text-muted">+{coffee.flavorNotes.length - 3}</span>
+        {coffee.flavorNotes.length > 2 && (
+          <span className="text-xs text-text-muted">+{coffee.flavorNotes.length - 2}</span>
         )}
       </div>
 
       {/* 간단한 아이콘 버튼들 */}
       <div className="flex gap-2">
+        <button
+          onClick={copyHomeUrl}
+          className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+          title="홈 URL 복사"
+        >
+          <Icons.Link className="w-4 h-4" />
+        </button>
         <button
           onClick={() => onEdit(coffee.id)}
           className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
@@ -138,6 +168,19 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
 }
 
 function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardProps) {
+  const baseUrl = window.location.origin;
+  const homeUrl = `${baseUrl}/?product=${product.id}`;
+
+  const copyHomeUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(homeUrl);
+      alert('홈 URL이 클립보드에 복사되었습니다!');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      alert('복사에 실패했습니다.');
+    }
+  };
+
   return (
     <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
       product.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
@@ -183,6 +226,13 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
 
       {/* 간단한 아이콘 버튼들 */}
       <div className="flex gap-2">
+        <button
+          onClick={copyHomeUrl}
+          className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+          title="홈 URL 복사"
+        >
+          <Icons.Link className="w-4 h-4" />
+        </button>
         <button
           onClick={() => onEdit(product.id)}
           className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
@@ -491,10 +541,6 @@ export function Dashboard() {
     );
   }
 
-  const currentData = activeTab === 'coffee' ? coffees : products;
-  const activeCount = currentData.filter(item => item.active).length;
-  const totalCount = currentData.length;
-
   return (
     <div className="min-h-screen bg-bg-primary p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -532,18 +578,6 @@ export function Dashboard() {
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-green-50 p-4 rounded-xl">
-            <div className="text-2xl font-bold text-green-600">{activeCount}</div>
-            <div className="text-sm text-green-600">활성 {activeTab === 'coffee' ? '커피' : '상품'}</div>
-          </div>
-          <div className="bg-blue-50 p-4 rounded-xl">
-            <div className="text-2xl font-bold text-blue-600">{totalCount}</div>
-            <div className="text-sm text-blue-600">전체 {activeTab === 'coffee' ? '커피' : '상품'}</div>
-          </div>
-        </div>
-
         {/* Add Button */}
         <div className="flex justify-end">
           <button
@@ -557,7 +591,7 @@ export function Dashboard() {
 
         {/* Content */}
         <div className="space-y-6">
-          {currentData.length === 0 ? (
+          {(activeTab === 'coffee' ? coffees : products).length === 0 ? (
             <div className="text-center py-12 text-text-muted">
               <div className="text-4xl mb-4">{activeTab === 'coffee' ? '☕' : '🏪'}</div>
               <p className="text-lg">등록된 {activeTab === 'coffee' ? '커피' : '상품'}가 없습니다.</p>
@@ -657,6 +691,70 @@ export function Dashboard() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      농장
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.farm}
+                      onChange={(e) => handleInputChange('farm', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      품종
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.variety}
+                      onChange={(e) => handleInputChange('variety', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      가공 방식
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.process}
+                      onChange={(e) => handleInputChange('process', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      placeholder="예: 워시드, 내추럴"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      지역
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.region}
+                      onChange={(e) => handleInputChange('region', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1">
+                    고도
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.altitude}
+                    onChange={(e) => handleInputChange('altitude', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    placeholder="예: 1,800m"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-1">
                     풍미 노트
@@ -700,6 +798,20 @@ export function Dashboard() {
                     onChange={(e) => handleInputChange('masterComment', e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    placeholder="커피에 대한 전문가의 코멘트"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1">
+                    상세 설명
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    placeholder="커피에 대한 자세한 설명을 입력해주세요"
                   />
                 </div>
 
