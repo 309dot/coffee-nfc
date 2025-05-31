@@ -26,6 +26,7 @@ export interface CoffeeData {
   region: string;
   altitude: string;
   description: string;
+  imageUrl?: string;
 }
 
 export interface CoffeeApiData extends CoffeeData {

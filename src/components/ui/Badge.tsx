@@ -14,9 +14,9 @@ export function Badge({ children, variant = 'default', className, onClick }: Bad
       className={cn(
         'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
         {
-          'bg-gray-100 text-gray-800': variant === 'default',
+          'bg-badge-bg text-badge-text': variant === 'default',
           'bg-gray-50 text-gray-600': variant === 'secondary',
-          'cursor-pointer hover:bg-gray-200 transition-colors': onClick
+          'cursor-pointer hover:bg-badge-bg/80 transition-colors': onClick
         },
         className
       )}
