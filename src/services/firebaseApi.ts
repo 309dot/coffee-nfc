@@ -220,11 +220,6 @@ export const initializeData = async () => {
 // ===== 풍미 노트 관련 함수들 =====
 
 // 풍미 노트 ID 생성
-const generateFlavorNoteId = (): string => {
-  const timestamp = Date.now().toString(36);
-  const randomStr = Math.random().toString(36).substring(2, 7);
-  return `fn-${timestamp}-${randomStr}`;
-};
 
 // 모든 풍미 노트 가져오기 (활성화된 것만)
 export const getAllFlavorNotes = async (): Promise<FlavorNote[]> => {
