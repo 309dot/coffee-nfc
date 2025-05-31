@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { M1CTLogo, InstagramIcon, GlobeIcon } from '../components/icons';
 import { api, type CoffeeApiData } from '../services/api';
 
 interface ProductModalProps {
@@ -117,21 +116,6 @@ export function Shop() {
   return (
     <>
       <div className="bg-white rounded-b-2xl flex-1 flex flex-col">
-        {/* Header - Logo와 버튼들 */}
-        <div className="flex items-center justify-between px-6 py-2 border-b border-gray-100">
-          <div className="flex items-center">
-            <M1CTLogo className="text-gray-900" />
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
-              <InstagramIcon size={20} className="text-white" />
-            </button>
-            <button className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
-              <GlobeIcon size={20} className="text-white" />
-            </button>
-          </div>
-        </div>
-
         {/* Shop Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6">
