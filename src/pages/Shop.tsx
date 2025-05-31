@@ -73,10 +73,10 @@ function ShopCard({ product, onClick }: ShopCardProps) {
       onClick={onClick}
       className="flex flex-col gap-2 cursor-pointer"
     >
-      {/* 상품 이미지 - Figma: 180px 높이, 8px border-radius */}
+      {/* 상품 이미지 - 정사각형 비율로 변경 */}
       <div 
-        className="bg-gray-100 rounded-lg overflow-hidden w-full"
-        style={{ height: '180px', borderRadius: '8px' }}
+        className="bg-gray-100 rounded-lg overflow-hidden w-full aspect-square"
+        style={{ borderRadius: '8px' }}
       >
         {product.imageUrl ? (
           <img

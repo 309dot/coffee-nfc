@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/Badge';
+import { Toast, useToast } from '../components/ui/Toast';
 import type { CoffeeApiData } from '../services/api';
 import { firebaseApi } from '../services/firebaseApi';
 import type { Product } from '../types';
@@ -75,191 +76,209 @@ const Icons = {
 function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?coffee=${coffee.id}`;
+  const { toast, showToast, hideToast } = useToast();
 
   const copyHomeUrl = async () => {
     try {
       await navigator.clipboard.writeText(homeUrl);
-      alert('홈 URL이 클립보드에 복사되었습니다!');
+      showToast('홈 URL이 클립보드에 복사되었습니다!');
     } catch (error) {
       console.error('Failed to copy:', error);
-      alert('복사에 실패했습니다.');
+      showToast('복사에 실패했습니다.');
     }
   };
 
   return (
-    <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
-      coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
-    }`}>
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1 min-w-0">
-          <h3 className={`font-bold text-lg truncate ${
-            coffee.active ? 'text-text-primary' : 'text-gray-400'
-          }`}>
-            {coffee.titleKo}
-          </h3>
-          <p className={`text-sm truncate ${
-            coffee.active ? 'text-text-muted' : 'text-gray-400'
-          }`}>
-            {coffee.titleEn}
-          </p>
+    <>
+      <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
+        coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
+      }`}>
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1 min-w-0">
+            <h3 className={`font-bold text-lg truncate ${
+              coffee.active ? 'text-text-primary' : 'text-gray-400'
+            }`}>
+              {coffee.titleKo}
+            </h3>
+            <p className={`text-sm truncate ${
+              coffee.active ? 'text-text-muted' : 'text-gray-400'
+            }`}>
+              {coffee.titleEn}
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-1 ml-4">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              coffee.active 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {coffee.active ? '활성' : '비활성'}
+            </span>
+            <span className="text-sm font-medium text-text-primary">
+              {coffee.price ? `₩${coffee.price.toLocaleString()}` : '가격 미설정'}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-1 ml-4">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            coffee.active 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {coffee.active ? '활성' : '비활성'}
-          </span>
-          <span className="text-sm font-medium text-text-primary">
-            {coffee.price ? `₩${coffee.price.toLocaleString()}` : '가격 미설정'}
-          </span>
+
+        <div className="flex flex-wrap gap-1 mb-3">
+          {coffee.flavorNotes.slice(0, 2).map((note, index) => (
+            <Badge key={index} className="text-xs">
+              {note}
+            </Badge>
+          ))}
+          {coffee.flavorNotes.length > 2 && (
+            <span className="text-xs text-text-muted">+{coffee.flavorNotes.length - 2}</span>
+          )}
+        </div>
+
+        {/* 간단한 아이콘 버튼들 */}
+        <div className="flex gap-2">
+          <button
+            onClick={copyHomeUrl}
+            className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+            title="홈 URL 복사"
+          >
+            <Icons.Link className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onEdit(coffee.id)}
+            className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+            title="편집"
+          >
+            <Icons.Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onToggleActive(coffee.id, !coffee.active)}
+            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+              coffee.active
+                ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                : 'bg-green-100 text-green-600 hover:bg-green-200'
+            }`}
+            title={coffee.active ? '비활성화' : '활성화'}
+          >
+            <Icons.Toggle className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDelete(coffee.id)}
+            className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+            title="삭제"
+          >
+            <Icons.Delete className="w-4 h-4" />
+          </button>
         </div>
       </div>
-
-      <div className="flex flex-wrap gap-1 mb-3">
-        {coffee.flavorNotes.slice(0, 2).map((note, index) => (
-          <Badge key={index} className="text-xs">
-            {note}
-          </Badge>
-        ))}
-        {coffee.flavorNotes.length > 2 && (
-          <span className="text-xs text-text-muted">+{coffee.flavorNotes.length - 2}</span>
-        )}
-      </div>
-
-      {/* 간단한 아이콘 버튼들 */}
-      <div className="flex gap-2">
-        <button
-          onClick={copyHomeUrl}
-          className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
-          title="홈 URL 복사"
-        >
-          <Icons.Link className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onEdit(coffee.id)}
-          className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-          title="편집"
-        >
-          <Icons.Edit className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onToggleActive(coffee.id, !coffee.active)}
-          className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
-            coffee.active
-              ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-              : 'bg-green-100 text-green-600 hover:bg-green-200'
-          }`}
-          title={coffee.active ? '비활성화' : '활성화'}
-        >
-          <Icons.Toggle className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onDelete(coffee.id)}
-          className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-          title="삭제"
-        >
-          <Icons.Delete className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
+      
+      <Toast 
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+    </>
   );
 }
 
 function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?product=${product.id}`;
+  const { toast, showToast, hideToast } = useToast();
 
   const copyHomeUrl = async () => {
     try {
       await navigator.clipboard.writeText(homeUrl);
-      alert('홈 URL이 클립보드에 복사되었습니다!');
+      showToast('홈 URL이 클립보드에 복사되었습니다!');
     } catch (error) {
       console.error('Failed to copy:', error);
-      alert('복사에 실패했습니다.');
+      showToast('복사에 실패했습니다.');
     }
   };
 
   return (
-    <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
-      product.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
-    }`}>
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1 min-w-0">
-          <h3 className={`font-bold text-lg truncate ${
-            product.active ? 'text-text-primary' : 'text-gray-400'
-          }`}>
-            {product.titleKo}
-          </h3>
-          {product.titleEn && (
-            <p className={`text-sm truncate ${
-              product.active ? 'text-text-muted' : 'text-gray-400'
+    <>
+      <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
+        product.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
+      }`}>
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1 min-w-0">
+            <h3 className={`font-bold text-lg truncate ${
+              product.active ? 'text-text-primary' : 'text-gray-400'
             }`}>
-              {product.titleEn}
-            </p>
-          )}
+              {product.titleKo}
+            </h3>
+            {product.titleEn && (
+              <p className={`text-sm truncate ${
+                product.active ? 'text-text-muted' : 'text-gray-400'
+              }`}>
+                {product.titleEn}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col items-end gap-1 ml-4">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              product.active 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {product.active ? '활성' : '비활성'}
+            </span>
+            <span className="text-sm font-medium text-text-primary">
+              ₩{product.price.toLocaleString()}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-1 ml-4">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+
+        <div className="mb-3">
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
             product.active 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
+              ? 'bg-blue-100 text-blue-800' 
+              : 'bg-gray-100 text-gray-400'
           }`}>
-            {product.active ? '활성' : '비활성'}
-          </span>
-          <span className="text-sm font-medium text-text-primary">
-            ₩{product.price.toLocaleString()}
+            {product.category}
           </span>
         </div>
-      </div>
 
-      <div className="mb-3">
-        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-          product.active 
-            ? 'bg-blue-100 text-blue-800' 
-            : 'bg-gray-100 text-gray-400'
-        }`}>
-          {product.category}
-        </span>
+        {/* 간단한 아이콘 버튼들 */}
+        <div className="flex gap-2">
+          <button
+            onClick={copyHomeUrl}
+            className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+            title="홈 URL 복사"
+          >
+            <Icons.Link className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onEdit(product.id)}
+            className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+            title="편집"
+          >
+            <Icons.Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onToggleActive(product.id, !product.active)}
+            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+              product.active
+                ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                : 'bg-green-100 text-green-600 hover:bg-green-200'
+            }`}
+            title={product.active ? '비활성화' : '활성화'}
+          >
+            <Icons.Toggle className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDelete(product.id)}
+            className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+            title="삭제"
+          >
+            <Icons.Delete className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-
-      {/* 간단한 아이콘 버튼들 */}
-      <div className="flex gap-2">
-        <button
-          onClick={copyHomeUrl}
-          className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
-          title="홈 URL 복사"
-        >
-          <Icons.Link className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onEdit(product.id)}
-          className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-          title="편집"
-        >
-          <Icons.Edit className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onToggleActive(product.id, !product.active)}
-          className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
-            product.active
-              ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-              : 'bg-green-100 text-green-600 hover:bg-green-200'
-          }`}
-          title={product.active ? '비활성화' : '활성화'}
-        >
-          <Icons.Toggle className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onDelete(product.id)}
-          className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-          title="삭제"
-        >
-          <Icons.Delete className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
+      
+      <Toast 
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+    </>
   );
 }
 
@@ -622,11 +641,11 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Coffee Form Modal */}
+      {/* Coffee Form Modal - 높이 고정 */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 space-y-6">
+          <div className="bg-white rounded-2xl w-full max-w-2xl h-[90vh] flex flex-col">
+            <div className="p-6 flex-shrink-0">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-text-primary">
                   {editingCoffee ? '커피 편집' : '새 커피 추가'}
@@ -638,8 +657,10 @@ export function Dashboard() {
                   <Icons.Close className="w-5 h-5" />
                 </button>
               </div>
-
-              <div className="space-y-4">
+            </div>
+            
+            <div className="flex-1 overflow-y-auto px-6">
+              <div className="space-y-4 pb-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">
@@ -828,8 +849,10 @@ export function Dashboard() {
                   </label>
                 </div>
               </div>
-
-              <div className="flex gap-3 pt-4">
+            </div>
+            
+            <div className="flex-shrink-0 p-6 pt-0">
+              <div className="flex gap-3">
                 <button
                   onClick={resetForm}
                   className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -849,11 +872,11 @@ export function Dashboard() {
         </div>
       )}
 
-      {/* Product Form Modal */}
+      {/* Product Form Modal - 높이 고정 */}
       {showProductForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 space-y-6">
+          <div className="bg-white rounded-2xl w-full max-w-2xl h-[90vh] flex flex-col">
+            <div className="p-6 flex-shrink-0">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-text-primary">
                   {editingProduct ? '상품 편집' : '새 상품 추가'}
@@ -865,8 +888,10 @@ export function Dashboard() {
                   <Icons.Close className="w-5 h-5" />
                 </button>
               </div>
-
-              <div className="space-y-4">
+            </div>
+            
+            <div className="flex-1 overflow-y-auto px-6">
+              <div className="space-y-4 pb-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">
@@ -961,8 +986,10 @@ export function Dashboard() {
                   </label>
                 </div>
               </div>
-
-              <div className="flex gap-3 pt-4">
+            </div>
+            
+            <div className="flex-shrink-0 p-6 pt-0">
+              <div className="flex gap-3">
                 <button
                   onClick={resetProductForm}
                   className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"

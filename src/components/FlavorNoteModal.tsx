@@ -34,7 +34,7 @@ export function FlavorNoteModal({ isOpen, onClose, flavorNoteName }: FlavorNoteM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/55 backdrop-blur-sm p-6">
-      <div className="bg-white rounded-2xl w-full max-w-sm max-h-[620px] flex flex-col overflow-hidden shadow-2xl">
+      <div className="bg-white rounded-2xl w-full max-w-sm h-[620px] flex flex-col overflow-hidden shadow-2xl">
         {/* Top Section with Image and Close Button */}
         <div className="relative flex-shrink-0">
           {/* Background Image */}
@@ -64,7 +64,7 @@ export function FlavorNoteModal({ isOpen, onClose, flavorNoteName }: FlavorNoteM
           </div>
         </div>
 
-        {/* Content Container */}
+        {/* Content Container - 고정 높이와 스크롤 처리 */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
           {loading ? (
             <div className="flex items-center justify-center py-8">
