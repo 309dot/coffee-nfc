@@ -426,7 +426,6 @@ export const firebaseApi = {
     try {
       const q = query(
         collection(db, COFFEES_COLLECTION), 
-        where('active', '==', true),
         orderBy('createdAt', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -600,7 +599,6 @@ export const firebaseApi = {
     try {
       const q = query(
         collection(db, PRODUCTS_COLLECTION),
-        where('active', '==', true)
       );
       const querySnapshot = await getDocs(q);
       
