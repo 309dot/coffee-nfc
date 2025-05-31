@@ -5,7 +5,7 @@ import { Detail } from './pages/Detail';
 import { Shop } from './pages/Shop';
 import { Dashboard } from './pages/Dashboard';
 
-type Tab = 'coffee' | 'details' | 'coffee-shop';
+type Tab = 'coffee' | 'details' | 'shop';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('coffee');
@@ -23,7 +23,7 @@ function App() {
     
     // 페이지 결정 로직
     if (page === 'shop') {
-      setActiveTab('coffee-shop');
+      setActiveTab('shop');
     } else if (page === 'details') {
       setActiveTab('details');
     } else {
@@ -42,7 +42,7 @@ function App() {
     switch (activeTab) {
       case 'coffee':
         return <Home />;
-      case 'coffee-shop':
+      case 'shop':
         return <Shop />;
       case 'details':
         return <Detail />;
@@ -54,7 +54,8 @@ function App() {
   const handleTabChange = (tab: string) => {
     const tabMapping: Record<string, Tab> = {
       'coffee': 'coffee',
-      'details': 'details'
+      'details': 'details',
+      'shop': 'shop'
     };
     
     const newTab = tabMapping[tab] || 'coffee';
@@ -66,6 +67,8 @@ function App() {
     
     if (newTab === 'details') {
       window.history.pushState({}, '', `/?page=details${coffeeId ? `&coffee=${coffeeId}` : ''}`);
+    } else if (newTab === 'shop') {
+      window.history.pushState({}, '', `/?page=shop${coffeeId ? `&coffee=${coffeeId}` : ''}`);
     } else {
       window.history.pushState({}, '', `/${coffeeId ? `?coffee=${coffeeId}` : ''}`);
     }

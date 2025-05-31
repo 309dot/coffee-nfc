@@ -1,67 +1,111 @@
 import { useState, useEffect } from 'react';
-import { Badge } from '../components/ui/Badge';
-import { ArrowRightIcon } from '../components/icons';
+import { X } from 'lucide-react';
+import { M1CTLogo, InstagramIcon, GlobeIcon } from '../components/icons';
 import { api, type CoffeeApiData } from '../services/api';
-import { useAppStore } from '../store/useAppStore';
-import { analyticsService } from '../services/analytics';
+
+interface ProductModalProps {
+  product: CoffeeApiData;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-6">
+      <div className="bg-white rounded-2xl w-full max-w-sm max-h-[620px] flex flex-col overflow-hidden">
+        {/* Modal Header with Close Button */}
+        <div className="relative">
+          <div className="w-full h-72 bg-gray-100 rounded-t-2xl overflow-hidden">
+            <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+              <span className="text-4xl">☕</span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            <X size={20} className="text-gray-600" />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex flex-col h-full gap-8">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-gray-600">notice</p>
+              <h2 className="text-2xl font-bold text-gray-900">🙏</h2>
+              <h3 className="text-2xl font-bold text-gray-900">매장 카운터에서 상품을 주문해주세요</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                현재 온라인 스토어를 운영하고 있지 않습니다. 구매를 원하신다면 카운터에서 상품을 다시 한번 문의 부탁드립니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface ShopCardProps {
+  product: CoffeeApiData;
+  onClick: () => void;
+}
+
+function ShopCard({ product, onClick }: ShopCardProps) {
+  return (
+    <div 
+      className="flex flex-col gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+      onClick={onClick}
+    >
+      <div className="w-full h-44 bg-gray-100 rounded-lg overflow-hidden">
+        <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+          <span className="text-3xl">☕</span>
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <p className="text-sm text-gray-600">coffee</p>
+        <p className="text-base font-semibold text-gray-900">{product.titleKo}</p>
+        <p className="text-base text-gray-900">{product.price ? `${product.price.toLocaleString()}원` : '가격 문의'}</p>
+      </div>
+    </div>
+  );
+}
 
 export function Shop() {
-  const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
+  const [products, setProducts] = useState<CoffeeApiData[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<CoffeeApiData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { addToCart, addToFavorites, favorites } = useAppStore();
 
   useEffect(() => {
-    const loadCoffeeData = async () => {
-      setLoading(true);
+    const loadProducts = async () => {
       try {
-        // URL에서 coffee ID 파라미터 확인
-        const urlParams = new URLSearchParams(window.location.search);
-        const coffeeId = urlParams.get('coffee') || 'eth-001'; // 기본값
-        
-        const data = await api.getCoffeeById(coffeeId);
-        if (data && data.active) {
-          setCoffee(data);
-          
-          // 분석 추적: 페이지 조회
-          analyticsService.trackView(coffeeId);
-        } else {
-          // 원두를 찾을 수 없으면 첫 번째 활성 원두로 폴백
-          const allCoffees = await api.getAllCoffees();
-          if (allCoffees.length > 0) {
-            setCoffee(allCoffees[0]);
-            analyticsService.trackView(allCoffees[0].id);
-          }
-        }
+        setLoading(true);
+        const coffees = await api.getAllCoffees();
+        // 활성화된 커피만 필터링하고, 가격이 있는 항목을 우선적으로 표시
+        const activeProducts = coffees.filter(coffee => coffee.active);
+        setProducts(activeProducts);
       } catch (error) {
-        console.error('Error loading coffee data:', error);
+        console.error('Error loading products:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadCoffeeData();
+    loadProducts();
   }, []);
 
-  const handleAddToCart = () => {
-    if (coffee) {
-      addToCart({
-        id: coffee.id,
-        name: coffee.titleKo,
-        price: coffee.price || 0,
-        quantity: 1,
-      });
-      alert('장바구니에 추가되었습니다!');
-    }
+  const handleProductClick = (product: CoffeeApiData) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
   };
 
-  const handleAddToFavorites = () => {
-    if (coffee) {
-      addToFavorites(coffee.id);
-      alert('즐겨찾기에 추가되었습니다!');
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
   };
-
-  const isFavorite = coffee ? favorites.includes(coffee.id) : false;
 
   if (loading) {
     return (
@@ -74,118 +118,56 @@ export function Shop() {
     );
   }
 
-  if (!coffee) {
-    return (
-      <div className="bg-white rounded-b-2xl flex-1 flex flex-col items-center justify-center p-6">
-        <p className="text-text-muted">커피 정보를 찾을 수 없습니다.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white rounded-b-2xl flex-1 flex flex-col">
-      {/* Header */}
-      <section className="px-6 pt-6">
-        <div className="mb-4">
-          <h1 className="text-3xl font-bold text-text-primary leading-tight">
-            {coffee.titleKo}
-          </h1>
-          <p className="text-base font-light text-text-primary mt-1">
-            {coffee.titleEn}
-          </p>
-        </div>
-        
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {coffee.flavorNotes.map((note: string, index: number) => (
-            <Badge key={index}>
-              {note}
-            </Badge>
-          ))}
-        </div>
-      </section>
-
-      {/* Coffee Details */}
-      <section className="px-6 flex-1 overflow-y-auto">
-        <div className="space-y-4">
-          {/* Master Comment */}
-          <div className="bg-comment-bg rounded-2xl p-4">
-            <h3 className="font-bold text-text-primary mb-2">Master Comment</h3>
-            <p className="text-text-primary text-sm">
-              {coffee.masterComment}
-            </p>
+    <>
+      <div className="bg-white rounded-b-2xl flex-1 flex flex-col">
+        {/* Header - Logo와 버튼들 */}
+        <div className="flex items-center justify-between px-6 py-2 border-b border-gray-100">
+          <div className="flex items-center">
+            <M1CTLogo className="text-gray-900" />
           </div>
+          <div className="flex items-center gap-2">
+            <button className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+              <InstagramIcon size={20} className="text-white" />
+            </button>
+            <button className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+              <GlobeIcon size={20} className="text-white" />
+            </button>
+          </div>
+        </div>
 
-          {/* Coffee Info */}
-          <div className="bg-gray-50 rounded-2xl p-4">
-            <h3 className="font-bold text-text-primary mb-3">커피 정보</h3>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-text-muted">나라</p>
-                <p className="font-medium text-text-primary">{coffee.country}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">농장</p>
-                <p className="font-medium text-text-primary">{coffee.farm}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">품종</p>
-                <p className="font-medium text-text-primary">{coffee.variety}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">프로세스</p>
-                <p className="font-medium text-text-primary">{coffee.process}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">지역</p>
-                <p className="font-medium text-text-primary">{coffee.region}</p>
-              </div>
-              <div>
-                <p className="text-text-muted">고도</p>
-                <p className="font-medium text-text-primary">{coffee.altitude}</p>
-              </div>
-              {coffee.price && (
-                <div>
-                  <p className="text-text-muted">가격</p>
-                  <p className="font-bold text-text-primary">₩{coffee.price.toLocaleString()}</p>
-                </div>
-              )}
+        {/* Shop Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {/* Product Grid */}
+            <div className="grid grid-cols-2 gap-4 gap-y-12">
+              {products.map((product) => (
+                <ShopCard
+                  key={product.id}
+                  product={product}
+                  onClick={() => handleProductClick(product)}
+                />
+              ))}
             </div>
-          </div>
-
-          {/* Description */}
-          <div className="bg-cta-bg rounded-2xl p-4">
-            <h3 className="font-bold text-text-primary mb-3">원두 소개</h3>
-            <p className="text-text-primary text-sm leading-relaxed whitespace-pre-line">
-              {coffee.description}
-            </p>
+            
+            {products.length === 0 && !loading && (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                <span className="text-4xl mb-4">☕</span>
+                <p>등록된 상품이 없습니다.</p>
+              </div>
+            )}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Action Buttons */}
-      <section className="px-6 py-4 border-t border-gray-100">
-        <div className="flex gap-3">
-          <button
-            onClick={handleAddToFavorites}
-            disabled={isFavorite}
-            className={`flex-1 py-3 rounded-full font-medium transition-colors ${
-              isFavorite
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-badge-bg text-badge-text hover:bg-badge-bg/80'
-            }`}
-          >
-            {isFavorite ? '즐겨찾기 완료' : '즐겨찾기 추가'}
-          </button>
-          <button
-            onClick={handleAddToCart}
-            className="flex-1 bg-text-primary text-white py-3 rounded-full font-medium hover:bg-text-primary/90 transition-colors flex items-center justify-center gap-2"
-          >
-            장바구니 담기
-            <ArrowRightIcon size={16} />
-          </button>
-        </div>
-      </section>
-    </div>
+      {/* Product Modal */}
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
+    </>
   );
 } 

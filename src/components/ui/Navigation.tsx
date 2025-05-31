@@ -10,7 +10,7 @@ export function Navigation({ activeTab = 'coffee', onTabChange }: NavigationProp
   const navItems = [
     { id: 'coffee', icon: LeadIcon, label: 'Coffee', visible: true },
     { id: 'details', icon: TodoIcon, label: 'Detail', visible: true },
-    { id: 'store', icon: Store2Icon, label: 'Store', visible: false },
+    { id: 'shop', icon: Store2Icon, label: 'Shop', visible: true },
     { id: 'menu', icon: MenuLineIcon, label: 'Menu', visible: false },
   ];
 
