@@ -43,7 +43,6 @@ export interface FlavorNote {
   imageUrl?: string;      // 관련 이미지 URL
   description: string;    // 한글 상세 설명
   category?: string;      // 풍미 카테고리 (예: "과일", "견과류", "향신료")
-  active: boolean;        // 활성 상태
   createdAt: string;
   updatedAt: string;
 } 

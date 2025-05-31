@@ -10,7 +10,6 @@ interface FlavorNoteFormData {
   emoji: string;
   description: string;
   category: string;
-  active: boolean;
 }
 
 interface CSVImportResult {
@@ -20,13 +19,22 @@ interface CSVImportResult {
   errors: string[];
 }
 
+interface SyncConfig {
+  type: 'googleSheets' | 'airtable';
+  url: string;
+  apiKey?: string; // Airtable용
+}
+
 export function FlavorNoteManager() {
   const [flavorNotes, setFlavorNotes] = useState<FlavorNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingNote, setEditingNote] = useState<FlavorNote | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [showSync, setShowSync] = useState(false);
   const [importResult, setImportResult] = useState<CSVImportResult | null>(null);
+  const [syncConfig, setSyncConfig] = useState<SyncConfig>({ type: 'googleSheets', url: '' });
+  const [syncing, setSyncing] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
   const [formData, setFormData] = useState<FlavorNoteFormData>({
@@ -35,7 +43,6 @@ export function FlavorNoteManager() {
     emoji: '',
     description: '',
     category: '',
-    active: true,
   });
 
   useEffect(() => {
@@ -47,7 +54,7 @@ export function FlavorNoteManager() {
     return unsubscribe;
   }, []);
 
-  const handleInputChange = (field: keyof FlavorNoteFormData, value: string | boolean) => {
+  const handleInputChange = (field: keyof FlavorNoteFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -58,7 +65,6 @@ export function FlavorNoteManager() {
       emoji: note.emoji,
       description: note.description,
       category: note.category || '',
-      active: note.active,
     });
     setEditingNote(note);
     setShowForm(true);
@@ -104,10 +110,35 @@ export function FlavorNoteManager() {
       emoji: '',
       description: '',
       category: '',
-      active: true,
     });
     setEditingNote(null);
     setShowForm(false);
+  };
+
+  const exportToCSV = () => {
+    const csvData = flavorNotes.map(note => ({
+      titleKo: note.titleKo,
+      titleEn: note.titleEn,
+      emoji: note.emoji,
+      description: note.description,
+      category: note.category || '',
+    }));
+
+    const csv = Papa.unparse(csvData, {
+      header: true
+    });
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `flavor-notes-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast('CSV 파일이 다운로드되었습니다.');
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,7 +189,6 @@ export function FlavorNoteManager() {
             emoji: row.emoji || row['이모지'] || '☕',
             description: row.description || row['설명'] || '',
             category: row.category || row['카테고리'] || '',
-            active: true,
           };
 
           const existingNote = existingMap.get(noteData.titleEn.toLowerCase());
@@ -192,6 +222,50 @@ export function FlavorNoteManager() {
     }
   };
 
+  const syncFromUrl = async () => {
+    if (!syncConfig.url.trim()) {
+      showToast('동기화 URL을 입력해주세요.');
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      let csvText = '';
+
+      if (syncConfig.type === 'googleSheets') {
+        // Google Sheets CSV export URL 처리
+        let url = syncConfig.url;
+        if (url.includes('/edit')) {
+          // 일반 Google Sheets URL을 CSV export URL로 변환
+          const sheetId = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+          if (sheetId) {
+            url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+          }
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Google Sheets 데이터를 가져올 수 없습니다.');
+        }
+        csvText = await response.text();
+      } else if (syncConfig.type === 'airtable') {
+        // Airtable API 동기화 (향후 구현 예정)
+        showToast('Airtable 동기화는 곧 지원될 예정입니다.');
+        setSyncing(false);
+        return;
+      }
+
+      await importFromCSV(csvText);
+      showToast('외부 데이터 동기화가 완료되었습니다.');
+      setShowSync(false);
+    } catch (error) {
+      console.error('Sync error:', error);
+      showToast('동기화 중 오류가 발생했습니다.');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const Icons = {
     Add: ({ className = "w-4 h-4" }) => (
       <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,6 +285,16 @@ export function FlavorNoteManager() {
     Upload: ({ className = "w-4 h-4" }) => (
       <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+      </svg>
+    ),
+    Download: ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M8 5a7 7 0 108 0" />
+      </svg>
+    ),
+    Sync: ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
       </svg>
     ),
     Close: ({ className = "w-4 h-4" }) => (
@@ -245,6 +329,20 @@ export function FlavorNoteManager() {
           </div>
           <div className="flex gap-2">
             <button
+              onClick={() => setShowSync(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Icons.Sync className="w-4 h-4" />
+              외부 동기화
+            </button>
+            <button
+              onClick={exportToCSV}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Icons.Download className="w-4 h-4" />
+              CSV 내보내기
+            </button>
+            <button
               onClick={() => setShowImport(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
@@ -261,62 +359,87 @@ export function FlavorNoteManager() {
           </div>
         </div>
 
-        {/* Flavor Notes List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {flavorNotes.map((note) => (
-            <div key={note.id} className="border rounded-xl p-4 hover:shadow-lg transition-all">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{note.emoji}</span>
-                  <div>
-                    <h3 className="font-semibold text-text-primary">{note.titleKo}</h3>
-                    <p className="text-sm text-text-muted">{note.titleEn}</p>
-                  </div>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  note.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {note.active ? '활성' : '비활성'}
-                </span>
-              </div>
-              
-              {note.category && (
-                <div className="mb-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {note.category}
-                  </span>
-                </div>
-              )}
-              
-              <p className="text-sm text-text-muted mb-3 line-clamp-2">{note.description}</p>
-              
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(note)}
-                  className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-                  title="편집"
-                >
-                  <Icons.Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(note.id)}
-                  className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                  title="삭제"
-                >
-                  <Icons.Delete className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {flavorNotes.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">🌟</div>
-            <p className="text-lg text-text-muted">등록된 풍미노트가 없습니다.</p>
-            <p className="text-sm text-text-muted">새 풍미노트를 추가하거나 CSV 파일을 가져와보세요!</p>
+        {/* Table View */}
+        <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    풍미노트
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    영문명
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    카테고리
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    설명
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    액션
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {flavorNotes.map((note) => (
+                  <tr key={note.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{note.emoji}</span>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{note.titleKo}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{note.titleEn}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {note.category && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {note.category}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-600 max-w-xs truncate">
+                        {note.description}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(note)}
+                          className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                          title="편집"
+                        >
+                          <Icons.Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(note.id)}
+                          className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                          title="삭제"
+                        >
+                          <Icons.Delete className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {flavorNotes.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">🌟</div>
+              <p className="text-lg text-text-muted">등록된 풍미노트가 없습니다.</p>
+              <p className="text-sm text-text-muted">새 풍미노트를 추가하거나 CSV 파일을 가져와보세요!</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Form Modal */}
@@ -402,19 +525,6 @@ export function FlavorNoteManager() {
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
                     placeholder="풍미노트에 대한 자세한 설명을 입력해주세요"
                   />
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="noteActive"
-                    checked={formData.active}
-                    onChange={(e) => handleInputChange('active', e.target.checked)}
-                    className="w-4 h-4 text-text-primary rounded"
-                  />
-                  <label htmlFor="noteActive" className="text-sm font-medium text-text-primary">
-                    풍미노트 활성화
-                  </label>
                 </div>
               </div>
             </div>
@@ -510,6 +620,136 @@ export function FlavorNoteManager() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sync Modal */}
+      {showSync && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-lg h-[80vh] flex flex-col">
+            <div className="p-6 flex-shrink-0">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-text-primary">외부 동기화</h2>
+                <button
+                  onClick={() => setShowSync(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <Icons.Close className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto px-6">
+              <div className="space-y-4 pb-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    동기화 유형
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setSyncConfig(prev => ({ ...prev, type: 'googleSheets' }))}
+                      className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                        syncConfig.type === 'googleSheets'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Google Sheets
+                    </button>
+                    <button
+                      onClick={() => setSyncConfig(prev => ({ ...prev, type: 'airtable' }))}
+                      className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                        syncConfig.type === 'airtable'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Airtable
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    {syncConfig.type === 'googleSheets' ? 'Google Sheets URL' : 'Airtable URL'}
+                  </label>
+                  <input
+                    type="url"
+                    value={syncConfig.url}
+                    onChange={(e) => setSyncConfig(prev => ({ ...prev, url: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    placeholder={
+                      syncConfig.type === 'googleSheets'
+                        ? 'https://docs.google.com/spreadsheets/d/...'
+                        : 'https://airtable.com/...'
+                    }
+                  />
+                </div>
+
+                {syncConfig.type === 'airtable' && (
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-2">
+                      API Key (선택사항)
+                    </label>
+                    <input
+                      type="password"
+                      value={syncConfig.apiKey || ''}
+                      onChange={(e) => setSyncConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      placeholder="Airtable API Key"
+                    />
+                  </div>
+                )}
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-800 mb-2">사용 방법:</h4>
+                  <div className="text-sm text-blue-700 space-y-2">
+                    {syncConfig.type === 'googleSheets' ? (
+                      <>
+                        <p>1. Google Sheets를 공개 상태로 설정하세요.</p>
+                        <p>2. 스프레드시트 URL을 복사하여 붙여넣으세요.</p>
+                        <p>3. 첫 번째 행은 헤더(titleKo, titleEn, emoji, description, category)여야 합니다.</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>1. Airtable 베이스를 공개하거나 API 키를 입력하세요.</p>
+                        <p>2. 베이스 URL을 복사하여 붙여넣으세요.</p>
+                        <p>3. titleKo, titleEn, emoji, description, category 필드가 필요합니다.</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex-shrink-0 p-6 pt-0">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowSync(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={syncFromUrl}
+                  disabled={syncing}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {syncing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      동기화 중...
+                    </>
+                  ) : (
+                    <>
+                      <Icons.Sync className="w-4 h-4" />
+                      동기화
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
