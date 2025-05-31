@@ -390,7 +390,7 @@ export function FlavorNoteManager() {
     <>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-text-primary">풍미노트 관리</h2>
             <p className="text-text-muted text-sm">총 {flavorNotes.length}개의 풍미노트</p>
@@ -398,31 +398,31 @@ export function FlavorNoteManager() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowSync(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center justify-center w-10 h-10 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors touch-manipulation"
+              title="외부 동기화"
             >
               <Icons.Sync className="w-4 h-4" />
-              외부 동기화
             </button>
             <button
               onClick={exportToCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="flex items-center justify-center w-10 h-10 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
+              title="CSV 내보내기"
             >
               <Icons.Download className="w-4 h-4" />
-              CSV 내보내기
             </button>
             <button
               onClick={() => setShowImport(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
+              title="CSV 가져오기"
             >
               <Icons.Upload className="w-4 h-4" />
-              CSV 가져오기
             </button>
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors"
+              className="flex items-center justify-center w-10 h-10 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors touch-manipulation"
+              title="새 풍미노트 추가"
             >
               <Icons.Add className="w-4 h-4" />
-              새 풍미노트 추가
             </button>
           </div>
         </div>
@@ -510,14 +510,14 @@ export function FlavorNoteManager() {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleEdit(note)}
-                          className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                          className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
                           title="편집"
                         >
                           <Icons.Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(note.id)}
-                          className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                          className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
                           title="삭제"
                         >
                           <Icons.Delete className="w-4 h-4" />
