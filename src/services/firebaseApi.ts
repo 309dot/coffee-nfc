@@ -407,8 +407,7 @@ export const firebaseApi = {
     try {
       const q = query(
         collection(db, PRODUCTS_COLLECTION),
-        where('active', '==', true),
-        orderBy('createdAt', 'desc')
+        where('active', '==', true)
       );
       const querySnapshot = await getDocs(q);
       
@@ -425,7 +424,7 @@ export const firebaseApi = {
   // 관리용: 모든 상품 가져오기 (활성/비활성 포함)
   getAllProductsAdmin: async (): Promise<Product[]> => {
     try {
-      const q = query(collection(db, PRODUCTS_COLLECTION), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, PRODUCTS_COLLECTION));
       const querySnapshot = await getDocs(q);
       
       return querySnapshot.docs.map(doc => ({
@@ -440,7 +439,7 @@ export const firebaseApi = {
 
   // 실시간 상품 데이터 구독
   subscribeToProducts: (callback: (products: Product[]) => void): (() => void) => {
-    const q = query(collection(db, PRODUCTS_COLLECTION), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, PRODUCTS_COLLECTION));
     
     return onSnapshot(q, (querySnapshot) => {
       const products = querySnapshot.docs.map(doc => ({
