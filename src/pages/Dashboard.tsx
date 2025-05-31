@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { Toast, useToast } from '../components/ui/Toast';
 import { FlavorNoteManager } from '../components/FlavorNoteManager';
@@ -89,6 +89,16 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
     }
   };
 
+  const formatDate = (dateString: string | Date | undefined) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
+
   return (
     <>
       <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
@@ -130,6 +140,12 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
           {coffee.flavorNotes.length > 2 && (
             <span className="text-xs text-text-muted">+{coffee.flavorNotes.length - 2}</span>
           )}
+        </div>
+
+        {/* 날짜 정보 추가 */}
+        <div className="mb-3 text-xs text-gray-500 space-y-1">
+          <div>생성일: {formatDate(coffee.createdAt)}</div>
+          <div>수정일: {formatDate(coffee.updatedAt)}</div>
         </div>
 
         {/* 간단한 아이콘 버튼들 */}
@@ -193,6 +209,16 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
     }
   };
 
+  const formatDate = (dateString: string | Date | undefined) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
+
   return (
     <>
       <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
@@ -235,6 +261,12 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
           }`}>
             {product.category}
           </span>
+        </div>
+
+        {/* 날짜 정보 추가 */}
+        <div className="mb-3 text-xs text-gray-500 space-y-1">
+          <div>생성일: {formatDate(product.createdAt)}</div>
+          <div>수정일: {formatDate(product.updatedAt)}</div>
         </div>
 
         {/* 간단한 아이콘 버튼들 */}
@@ -294,6 +326,13 @@ export function Dashboard() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [flavorNoteInput, setFlavorNoteInput] = useState('');
 
+  // 새로운 필터링 및 정렬 상태
+  const [coffeeFilter, setCoffeeFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [productFilter, setProductFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [coffeeSort, setCoffeeSort] = useState<'newest' | 'oldest' | 'name' | 'price'>('newest');
+  const [productSort, setProductSort] = useState<'newest' | 'oldest' | 'name' | 'price' | 'category'>('newest');
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Coffee form data
   const [formData, setFormData] = useState({
     titleKo: '',
@@ -338,6 +377,82 @@ export function Dashboard() {
       unsubscribeProducts();
     };
   }, []);
+
+  // 필터링 및 정렬된 데이터 계산
+  const filteredAndSortedCoffees = useMemo(() => {
+    let filtered = coffees.filter(coffee => {
+      // 상태 필터
+      if (coffeeFilter === 'active' && !coffee.active) return false;
+      if (coffeeFilter === 'inactive' && coffee.active) return false;
+      
+      // 검색 필터
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        return coffee.titleKo.toLowerCase().includes(term) ||
+               coffee.titleEn.toLowerCase().includes(term) ||
+               coffee.country?.toLowerCase().includes(term) ||
+               coffee.flavorNotes?.some(note => note.toLowerCase().includes(term));
+      }
+      
+      return true;
+    });
+
+    // 정렬
+    filtered.sort((a, b) => {
+      switch (coffeeSort) {
+        case 'newest':
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        case 'oldest':
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        case 'name':
+          return a.titleKo.localeCompare(b.titleKo);
+        case 'price':
+          return (b.price || 0) - (a.price || 0);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [coffees, coffeeFilter, coffeeSort, searchTerm]);
+
+  const filteredAndSortedProducts = useMemo(() => {
+    let filtered = products.filter(product => {
+      // 상태 필터
+      if (productFilter === 'active' && !product.active) return false;
+      if (productFilter === 'inactive' && product.active) return false;
+      
+      // 검색 필터
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        return product.titleKo.toLowerCase().includes(term) ||
+               product.titleEn?.toLowerCase().includes(term) ||
+               product.category.toLowerCase().includes(term);
+      }
+      
+      return true;
+    });
+
+    // 정렬
+    filtered.sort((a, b) => {
+      switch (productSort) {
+        case 'newest':
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        case 'oldest':
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        case 'name':
+          return a.titleKo.localeCompare(b.titleKo);
+        case 'price':
+          return b.price - a.price;
+        case 'category':
+          return a.category.localeCompare(b.category);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [products, productFilter, productSort, searchTerm]);
 
   // 폼 관련 함수들
   const handleInputChange = (field: string, value: string | number | boolean) => {
@@ -609,6 +724,89 @@ export function Dashboard() {
           </button>
         </div>
 
+        {/* Filter and Sort Controls - 풍미노트 탭에서는 숨김 */}
+        {activeTab !== 'flavorNotes' && (
+          <div className="bg-white p-4 rounded-xl border space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* 검색 */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">검색</label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={`${activeTab === 'coffee' ? '커피명, 원산지, 풍미노트' : '상품명, 카테고리'}로 검색...`}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                />
+              </div>
+
+              {/* 필터 */}
+              <div className="sm:w-48">
+                <label className="block text-sm font-medium text-gray-700 mb-1">상태 필터</label>
+                <select
+                  value={activeTab === 'coffee' ? coffeeFilter : productFilter}
+                  onChange={(e) => activeTab === 'coffee' 
+                    ? setCoffeeFilter(e.target.value as 'all' | 'active' | 'inactive')
+                    : setProductFilter(e.target.value as 'all' | 'active' | 'inactive')
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                >
+                  <option value="all">전체</option>
+                  <option value="active">활성</option>
+                  <option value="inactive">비활성</option>
+                </select>
+              </div>
+
+              {/* 정렬 */}
+              <div className="sm:w-48">
+                <label className="block text-sm font-medium text-gray-700 mb-1">정렬</label>
+                <select
+                  value={activeTab === 'coffee' ? coffeeSort : productSort}
+                  onChange={(e) => activeTab === 'coffee' 
+                    ? setCoffeeSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price')
+                    : setProductSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price' | 'category')
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                >
+                  <option value="newest">최신순</option>
+                  <option value="oldest">오래된순</option>
+                  <option value="name">이름순</option>
+                  <option value="price">가격순</option>
+                  {activeTab === 'products' && (
+                    <option value="category">카테고리순</option>
+                  )}
+                </select>
+              </div>
+            </div>
+
+            {/* 결과 요약 */}
+            <div className="flex justify-between items-center text-sm text-gray-600">
+              <div>
+                총 {activeTab === 'coffee' ? filteredAndSortedCoffees.length : filteredAndSortedProducts.length}개 
+                {searchTerm && ` (검색: "${searchTerm}")`}
+                {(activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all' && 
+                  ` (${(activeTab === 'coffee' ? coffeeFilter : productFilter) === 'active' ? '활성' : '비활성'})`
+                }
+              </div>
+              {(searchTerm || (activeTab === 'coffee' ? coffeeFilter : productFilter) !== 'all') && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    if (activeTab === 'coffee') {
+                      setCoffeeFilter('all');
+                    } else {
+                      setProductFilter('all');
+                    }
+                  }}
+                  className="text-text-primary hover:underline"
+                >
+                  필터 초기화
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Add Button - 풍미노트 탭에서는 숨김 */}
         {activeTab !== 'flavorNotes' && (
           <div className="flex justify-end">
@@ -628,7 +826,7 @@ export function Dashboard() {
             <FlavorNoteManager />
           ) : (
             <>
-              {(activeTab === 'coffee' ? coffees : products).length === 0 ? (
+              {(activeTab === 'coffee' ? filteredAndSortedCoffees : filteredAndSortedProducts).length === 0 ? (
                 <div className="text-center py-12 text-text-muted">
                   <div className="text-4xl mb-4">{activeTab === 'coffee' ? '☕' : '🏪'}</div>
                   <p className="text-lg">등록된 {activeTab === 'coffee' ? '커피' : '상품'}가 없습니다.</p>
@@ -636,7 +834,7 @@ export function Dashboard() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {activeTab === 'coffee' && coffees.map((coffee) => (
+                  {activeTab === 'coffee' && filteredAndSortedCoffees.map((coffee) => (
                     <CoffeeCard
                       key={coffee.id}
                       coffee={coffee}
@@ -645,7 +843,7 @@ export function Dashboard() {
                       onToggleActive={handleToggleActive}
                     />
                   ))}
-                  {activeTab === 'products' && products.map((product) => (
+                  {activeTab === 'products' && filteredAndSortedProducts.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}

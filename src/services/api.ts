@@ -33,6 +33,8 @@ export interface CoffeeApiData extends CoffeeData {
   id: string;
   active: boolean;
   price?: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 // 앱 시작시 초기화

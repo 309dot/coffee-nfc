@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Toast, useToast } from './ui/Toast';
 import { firebaseApi } from '../services/firebaseApi';
 import Papa from 'papaparse';
@@ -37,6 +37,10 @@ export function FlavorNoteManager() {
   const [syncing, setSyncing] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
+  // 정렬 상태 추가
+  const [sortField, setSortField] = useState<'titleKo' | 'titleEn' | 'category' | 'createdAt'>('createdAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
   const [formData, setFormData] = useState<FlavorNoteFormData>({
     titleKo: '',
     titleEn: '',
@@ -53,6 +57,55 @@ export function FlavorNoteManager() {
 
     return unsubscribe;
   }, []);
+
+  // 정렬된 데이터 계산
+  const sortedFlavorNotes = useMemo(() => {
+    return [...flavorNotes].sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+
+      // 날짜 필드의 경우 Date 객체로 변환
+      if (sortField === 'createdAt') {
+        aValue = new Date(aValue || 0);
+        bValue = new Date(bValue || 0);
+      }
+
+      // 문자열 필드의 경우
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      let comparison = 0;
+      if (aValue > bValue) {
+        comparison = 1;
+      } else if (aValue < bValue) {
+        comparison = -1;
+      }
+
+      return sortDirection === 'desc' ? -comparison : comparison;
+    });
+  }, [flavorNotes, sortField, sortDirection]);
+
+  // 헤더 클릭 핸들러
+  const handleSort = (field: 'titleKo' | 'titleEn' | 'category' | 'createdAt') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // 정렬 아이콘 컴포넌트
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortField !== field) {
+      return <Icons.Sort className="w-4 h-4 text-gray-400" />;
+    }
+    return sortDirection === 'asc' 
+      ? <Icons.SortUp className="w-4 h-4 text-text-primary" />
+      : <Icons.SortDown className="w-4 h-4 text-text-primary" />;
+  };
 
   const handleInputChange = (field: keyof FlavorNoteFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -307,6 +360,21 @@ export function FlavorNoteManager() {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
       </svg>
     ),
+    Sort: ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M3 8h18M3 12h18M3 16h18M3 20h18" />
+      </svg>
+    ),
+    SortUp: ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13l-3 3m0 0l-3-3m3 3V8" />
+      </svg>
+    ),
+    SortDown: ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13l3 3m0 0l3-3m-3 3V8" />
+      </svg>
+    ),
   };
 
   if (loading) {
@@ -365,17 +433,44 @@ export function FlavorNoteManager() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    풍미노트
+                  <th 
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('titleKo')}
+                  >
+                    <div className="flex items-center gap-2">
+                      풍미노트
+                      <SortIcon field="titleKo" />
+                    </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    영문명
+                  <th 
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('titleEn')}
+                  >
+                    <div className="flex items-center gap-2">
+                      영문명
+                      <SortIcon field="titleEn" />
+                    </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    카테고리
+                  <th 
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('category')}
+                  >
+                    <div className="flex items-center gap-2">
+                      카테고리
+                      <SortIcon field="category" />
+                    </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     설명
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                      생성일
+                      <SortIcon field="createdAt" />
+                    </div>
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     액션
@@ -383,7 +478,7 @@ export function FlavorNoteManager() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {flavorNotes.map((note) => (
+                {sortedFlavorNotes.map((note) => (
                   <tr key={note.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
@@ -407,6 +502,9 @@ export function FlavorNoteManager() {
                       <div className="text-sm text-gray-600 max-w-xs truncate">
                         {note.description}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                      {note.createdAt && new Date(note.createdAt).toLocaleDateString('ko-KR')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
