@@ -3,10 +3,13 @@
   "short_name": "M1CT Coffee",
   "description": "M1CT의 스페셜티 커피 정보와 맛 노트를 확인해보세요",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "background_color": "#1B1B1B",
+  "theme_color": "#1B1B1B",
   "orientation": "portrait",
+  "categories": ["food", "lifestyle"],
+  "lang": "ko",
   "icons": [
     {
       "src": "/favicon.svg",
@@ -17,6 +20,27 @@
       "src": "/apple-touch-icon-180x180.svg",
       "sizes": "180x180",
       "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "M1CT Coffee 모바일 화면"
     }
   ]
 } 

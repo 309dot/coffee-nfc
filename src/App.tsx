@@ -5,6 +5,7 @@ import { Home } from './pages/Home';
 import { Detail } from './pages/Detail';
 import { Shop } from './pages/Shop';
 import { Dashboard } from './pages/Dashboard';
+import { InstallPrompt } from './components/ui/InstallPrompt';
 import { initializeData } from './services/firebaseApi';
 
 type Tab = 'coffee' | 'details' | 'shop';
@@ -12,6 +13,7 @@ type Tab = 'coffee' | 'details' | 'shop';
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('coffee');
   const [searchParams] = useSearchParams();
+  const [showInstallPrompt, setShowInstallPrompt] = useState(true);
   const page = searchParams.get('page');
   const coffeeId = searchParams.get('coffee');
 
@@ -52,13 +54,27 @@ function App() {
 
   // Dashboard
   if (page === 'dashboard') {
-    return <Dashboard />;
+    return (
+      <>
+        <Dashboard />
+        {showInstallPrompt && (
+          <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
+        )}
+      </>
+    );
   }
 
   // 대시보드 렌더링 (URL에서 page=dashboard인 경우)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('page') === 'dashboard') {
-    return <Dashboard />;
+    return (
+      <>
+        <Dashboard />
+        {showInstallPrompt && (
+          <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
+        )}
+      </>
+    );
   }
 
   const renderPage = () => {
@@ -98,9 +114,14 @@ function App() {
   };
 
   return (
-    <Layout currentPage={activeTab} onPageChange={handleTabChange}>
-      {renderPage()}
-    </Layout>
+    <>
+      <Layout currentPage={activeTab} onPageChange={handleTabChange}>
+        {renderPage()}
+      </Layout>
+      {showInstallPrompt && (
+        <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
+      )}
+    </>
   );
 }
 
