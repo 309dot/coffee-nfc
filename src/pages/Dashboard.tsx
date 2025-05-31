@@ -333,13 +333,22 @@ export function Dashboard() {
             <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">커피 관리 대시보드</h1>
             <p className="text-text-muted mt-1">원두 정보를 관리하고 편집할 수 있습니다.</p>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-text-primary text-white rounded-xl font-medium hover:bg-text-primary/90 transition-colors w-full sm:w-auto"
-          >
-            <Icons.Add className="w-5 h-5" />
-            새 원두 추가
-          </button>
+          <div className="flex gap-3">
+            <a
+              href="/?page=product-dashboard"
+              className="flex items-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors"
+            >
+              <Icons.Shop className="w-5 h-5" />
+              상품 관리
+            </a>
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-text-primary text-white rounded-xl font-medium hover:bg-text-primary/90 transition-colors w-full sm:w-auto"
+            >
+              <Icons.Add className="w-5 h-5" />
+              새 원두 추가
+            </button>
+          </div>
         </div>
 
         {/* Statistics - 모바일 반응형 그리드 */}

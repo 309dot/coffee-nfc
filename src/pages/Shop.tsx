@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { api, type CoffeeApiData } from '../services/api';
+import { productApi } from '../services/api';
+import type { Product } from '../types';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -47,55 +48,88 @@ function ProductModal({ isOpen, onClose }: ProductModalProps) {
 }
 
 interface ShopCardProps {
-  product: CoffeeApiData;
+  product: Product;
   onClick: () => void;
 }
 
 function ShopCard({ product, onClick }: ShopCardProps) {
   return (
-    <div 
-      className="flex flex-col gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+    <div
       onClick={onClick}
+      className="bg-white rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
     >
-      <div className="w-full h-44 bg-gray-100 rounded-lg overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
-          <span className="text-3xl">☕</span>
-        </div>
+      {/* 상품 이미지 */}
+      <div className="w-full h-40 bg-gray-100 rounded-xl mb-4 overflow-hidden">
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={product.titleKo}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder-product.jpg'; // fallback image
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <div className="text-4xl">📦</div>
+          </div>
+        )}
       </div>
-      <div className="flex flex-col">
-        <p className="text-sm text-gray-600">coffee</p>
-        <p className="text-base font-semibold text-gray-900">{product.titleKo}</p>
-        <p className="text-base text-gray-900">{product.price ? `${product.price.toLocaleString()}원` : '가격 문의'}</p>
+
+      {/* 카테고리 */}
+      <div className="mb-2">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {product.category}
+        </span>
+      </div>
+
+      {/* 상품명 */}
+      <h3 className="font-bold text-lg text-text-primary mb-1 line-clamp-1">
+        {product.titleKo}
+      </h3>
+      
+      {product.titleEn && (
+        <p className="text-sm text-text-muted mb-3 line-clamp-1">
+          {product.titleEn}
+        </p>
+      )}
+
+      {/* 가격 */}
+      <div className="flex justify-between items-center">
+        <span className="text-lg font-bold text-text-primary">
+          ₩{product.price.toLocaleString()}
+        </span>
       </div>
     </div>
   );
 }
 
 export function Shop() {
-  const [products, setProducts] = useState<CoffeeApiData[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        const coffees = await api.getAllCoffees();
-        // 활성화된 커피만 필터링하고, 가격이 있는 항목을 우선적으로 표시
-        const activeProducts = coffees.filter(coffee => coffee.active);
-        setProducts(activeProducts);
-      } catch (error) {
-        console.error('Error loading products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadProducts();
   }, []);
 
-  const handleProductClick = () => {
-    setIsModalOpen(true);
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const productsData = await productApi.getAllProducts();
+      // 활성 상품만 표시
+      setProducts(productsData.filter(product => product.active));
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProductClick = (product: Product) => {
+    // 상품 클릭 처리 (모달 등)
+    console.log('Product clicked:', product);
   };
 
   const handleCloseModal = () => {
@@ -104,10 +138,12 @@ export function Shop() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-b-2xl flex-1 flex flex-col items-center justify-center">
-        <div className="animate-pulse">
-          <div className="w-16 h-16 bg-gray-200 rounded-full mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-32"></div>
+      <div className="min-h-screen bg-bg-primary p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center py-12">
+            <div className="text-4xl mb-4">🏪</div>
+            <p className="text-text-muted">상품을 불러오는 중...</p>
+          </div>
         </div>
       </div>
     );
@@ -125,7 +161,7 @@ export function Shop() {
                 <ShopCard
                   key={product.id}
                   product={product}
-                  onClick={() => handleProductClick()}
+                  onClick={() => handleProductClick(product)}
                 />
               ))}
             </div>

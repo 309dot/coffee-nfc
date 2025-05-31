@@ -19,4 +19,17 @@ export interface NavigationItem {
   icon: string;
   label: string;
   active?: boolean;
+}
+
+export interface Product {
+  id: string;
+  category: string;
+  titleKo: string;
+  titleEn?: string;
+  price: number;
+  description?: string;
+  imageUrl?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
 } 

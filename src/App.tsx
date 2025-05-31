@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
 import { Detail } from './pages/Detail';
 import { Shop } from './pages/Shop';
 import { Dashboard } from './pages/Dashboard';
+import { ProductDashboard } from './pages/ProductDashboard';
 
 type Tab = 'coffee' | 'details' | 'shop';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('coffee');
+  const [searchParams] = useSearchParams();
+  const page = searchParams.get('page');
+  const coffeeId = searchParams.get('coffee');
 
   useEffect(() => {
     // URL 파라미터 확인
@@ -31,6 +36,24 @@ function App() {
       setActiveTab('coffee');
     }
   }, []);
+
+  // Get data from URL for initial load
+  useEffect(() => {
+    if (coffeeId) {
+      // Coffee detail specified in URL
+      console.log('Loading coffee from URL:', coffeeId);
+    }
+  }, [coffeeId]);
+
+  // Product Dashboard
+  if (page === 'product-dashboard') {
+    return <ProductDashboard />;
+  }
+
+  // Dashboard
+  if (page === 'dashboard') {
+    return <Dashboard />;
+  }
 
   // 대시보드 렌더링 (URL에서 page=dashboard인 경우)
   const urlParams = new URLSearchParams(window.location.search);
