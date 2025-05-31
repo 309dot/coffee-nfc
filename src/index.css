@@ -41,3 +41,42 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Pretendard Font */
+  @font-face {
+    font-family: 'Pretendard';
+    src: url('./assets/fonts/PretendardVariable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* Custom word breaking styles */
+  .word-break-keep {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    hyphens: none;
+  }
+
+  .break-keep {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Tailwind theme overrides */
+:root {
+  --dark-navy: #0B0C0E;
+  --text-primary: #221E1F;
+  --text-muted: #686464;
+  --bg-primary: #0B0C0E;
+}
+
+.font-pretendard {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

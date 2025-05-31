@@ -9,11 +9,12 @@ import {
   query, 
   where, 
   orderBy,
-  onSnapshot
+  onSnapshot,
+  addDoc
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { CoffeeApiData } from './api';
-import type { Product } from '../types';
+import type { Product, FlavorNote } from '../types';
 
 // Collections
 const COFFEES_COLLECTION = 'coffees';
@@ -123,47 +124,327 @@ const initialProductData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>[] = [
   }
 ];
 
+// 기본 샘플 풍미 노트 데이터
+const initialFlavorNotes: Omit<FlavorNote, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  {
+    titleKo: "레몬 껍질",
+    titleEn: "lemon peel",
+    emoji: "🍋",
+    description: "커피의 풍미를 더욱 풍부하게 해주는 레몬 껍질에 대해 알아보세요. 레몬 껍질은 커피에 상큼한 향을 더해주며, 커피의 쓴맛을 부드럽게 해주는 역할을 합니다. 특히, 레몬 껍질을 갈아서 커피에 첨가하면 새로운 맛의 조화를 경험할 수 있습니다. 비타민 C와 항산화 물질이 풍부한 레몬 껍질은 건강에도 이로운 선택이 될 것입니다.",
+    category: "과일",
+    active: true
+  },
+  {
+    titleKo: "초콜릿",
+    titleEn: "chocolate",
+    emoji: "🍫",
+    description: "진한 초콜릿 향이 커피의 깊이를 더해줍니다. 카카오의 풍부한 향과 단맛이 커피의 쓴맛과 조화를 이루어 균형 잡힌 맛을 만들어냅니다. 특히 다크 초콜릿의 경우 커피의 바디감을 강화하며, 후미에 남는 달콤한 여운이 오래도록 지속됩니다.",
+    category: "단맛",
+    active: true
+  },
+  {
+    titleKo: "견과류",
+    titleEn: "nutty",
+    emoji: "🥜",
+    description: "고소한 견과류 풍미는 커피에 따뜻하고 부드러운 느낌을 더해줍니다. 아몬드, 헤이즐넛, 피칸 등의 향이 커피의 마일드함을 강조하며, 특히 아침 커피로 마시기에 적합한 친숙하고 편안한 맛을 제공합니다.",
+    category: "견과류",
+    active: true
+  },
+  {
+    titleKo: "베리류",
+    titleEn: "berry",
+    emoji: "🫐",
+    description: "상큼하고 달콤한 베리류 풍미는 커피에 과일의 신선함을 더해줍니다. 블루베리, 라즈베리, 블랙베리 등의 향이 커피의 산미와 어우러져 밝고 생동감 있는 맛을 만들어냅니다. 특히 스페셜티 커피에서 자주 발견되는 고급스러운 풍미입니다.",
+    category: "과일",
+    active: true
+  },
+  {
+    titleKo: "꽃향기",
+    titleEn: "floral",
+    emoji: "🌸",
+    description: "은은한 꽃향기는 커피에 우아하고 섬세한 향을 더해줍니다. 라벤더, 재스민, 장미 등의 플로럴 노트가 커피의 복합적인 아로마를 한층 풍부하게 만들어주며, 특히 라이트 로스팅에서 두드러지게 나타나는 특별한 풍미입니다.",
+    category: "플로럴",
+    active: true
+  }
+];
+
 // 초기 데이터 설정
-export const initializeData = async (): Promise<void> => {
+export const initializeData = async () => {
   try {
     // 커피 데이터 초기화
-    const coffeesSnapshot = await getDocs(collection(db, COFFEES_COLLECTION));
-    
+    const coffeesSnapshot = await getDocs(collection(db, 'coffees'));
     if (coffeesSnapshot.empty) {
       console.log('Initializing coffee data...');
-      for (const coffeeData of initialCoffeeData) {
-        const customId = generateCoffeeId(coffeeData.titleEn);
-        await setDoc(doc(db, COFFEES_COLLECTION, customId), {
-          id: customId,
-          ...coffeeData,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
-      }
-    }
-
-    // 상품 데이터 초기화
-    const productsSnapshot = await getDocs(collection(db, PRODUCTS_COLLECTION));
-    
-    if (productsSnapshot.empty) {
-      console.log('Initializing product data...');
-      for (const productData of initialProductData) {
-        const customId = generateProductId(productData.category);
-        await setDoc(doc(db, PRODUCTS_COLLECTION, customId), {
-          id: customId,
-          ...productData,
+      for (const coffee of initialCoffeeData) {
+        await addDoc(collection(db, 'coffees'), {
+          ...coffee,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         });
       }
+      console.log('Coffee data initialized');
+    }
+
+    // 상품 데이터 초기화
+    const productsSnapshot = await getDocs(collection(db, 'products'));
+    if (productsSnapshot.empty) {
+      console.log('Initializing product data...');
+      for (const product of initialProductData) {
+        await addDoc(collection(db, 'products'), {
+          ...product,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
+      console.log('Product data initialized');
+    }
+
+    // 풍미 노트 데이터 초기화
+    const flavorNotesSnapshot = await getDocs(collection(db, 'flavorNotes'));
+    if (flavorNotesSnapshot.empty) {
+      console.log('Initializing flavor notes data...');
+      for (const flavorNote of initialFlavorNotes) {
+        await addDoc(collection(db, 'flavorNotes'), {
+          ...flavorNote,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
+      console.log('Flavor notes data initialized');
     }
   } catch (error) {
     console.error('Error initializing data:', error);
   }
 };
 
+// ===== 풍미 노트 관련 함수들 =====
+
+// 풍미 노트 ID 생성
+const generateFlavorNoteId = (): string => {
+  const timestamp = Date.now().toString(36);
+  const randomStr = Math.random().toString(36).substring(2, 7);
+  return `fn-${timestamp}-${randomStr}`;
+};
+
+// 모든 풍미 노트 가져오기 (활성화된 것만)
+export const getAllFlavorNotes = async (): Promise<FlavorNote[]> => {
+  try {
+    const querySnapshot = await getDocs(
+      query(collection(db, 'flavorNotes'), where('active', '==', true))
+    );
+    
+    const flavorNotes = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as FlavorNote[];
+    
+    return flavorNotes;
+  } catch (error) {
+    console.error('Error fetching flavor notes:', error);
+    return [];
+  }
+};
+
+// 관리자용 모든 풍미 노트 가져오기
+export const getAllFlavorNotesAdmin = async (): Promise<FlavorNote[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'flavorNotes'));
+    
+    const flavorNotes = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as FlavorNote[];
+    
+    return flavorNotes;
+  } catch (error) {
+    console.error('Error fetching flavor notes (admin):', error);
+    return [];
+  }
+};
+
+// 특정 풍미 노트 가져오기
+export const getFlavorNoteById = async (id: string): Promise<FlavorNote | null> => {
+  try {
+    const docRef = doc(db, 'flavorNotes', id);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data()
+      } as FlavorNote;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching flavor note:', error);
+    return null;
+  }
+};
+
+// 풍미 노트명으로 검색 (한글/영문 모두 지원)
+export const findFlavorNoteByName = async (name: string): Promise<FlavorNote | null> => {
+  try {
+    // 한글명으로 검색
+    let querySnapshot = await getDocs(
+      query(
+        collection(db, 'flavorNotes'), 
+        where('titleKo', '==', name),
+        where('active', '==', true)
+      )
+    );
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as FlavorNote;
+    }
+    
+    // 영문명으로 검색
+    querySnapshot = await getDocs(
+      query(
+        collection(db, 'flavorNotes'), 
+        where('titleEn', '==', name.toLowerCase()),
+        where('active', '==', true)
+      )
+    );
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as FlavorNote;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error finding flavor note:', error);
+    return null;
+  }
+};
+
+// 풍미 노트 실시간 구독
+export const subscribeToFlavorNotes = (callback: (flavorNotes: FlavorNote[]) => void) => {
+  const q = query(collection(db, 'flavorNotes'));
+  
+  return onSnapshot(q, (querySnapshot) => {
+    const flavorNotes = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as FlavorNote[];
+    
+    callback(flavorNotes);
+  });
+};
+
+// 새 풍미 노트 생성
+export const createFlavorNote = async (data: Omit<FlavorNote, 'id' | 'createdAt' | 'updatedAt'>): Promise<FlavorNote> => {
+  try {
+    const now = new Date().toISOString();
+    const flavorNoteData = {
+      ...data,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    const docRef = await addDoc(collection(db, 'flavorNotes'), flavorNoteData);
+    
+    return {
+      id: docRef.id,
+      ...flavorNoteData
+    };
+  } catch (error) {
+    console.error('Error creating flavor note:', error);
+    throw error;
+  }
+};
+
+// 풍미 노트 수정
+export const updateFlavorNote = async (id: string, data: Partial<Omit<FlavorNote, 'id' | 'createdAt'>>): Promise<FlavorNote | null> => {
+  try {
+    const docRef = doc(db, 'flavorNotes', id);
+    const updateData = {
+      ...data,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await updateDoc(docRef, updateData);
+    
+    const updatedDoc = await getDoc(docRef);
+    if (updatedDoc.exists()) {
+      return {
+        id: updatedDoc.id,
+        ...updatedDoc.data()
+      } as FlavorNote;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error updating flavor note:', error);
+    throw error;
+  }
+};
+
+// 풍미 노트 삭제
+export const deleteFlavorNote = async (id: string): Promise<void> => {
+  try {
+    const docRef = doc(db, 'flavorNotes', id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error('Error deleting flavor note:', error);
+    throw error;
+  }
+};
+
+// 풍미 노트 활성화/비활성화
+export const toggleFlavorNoteActive = async (id: string, active: boolean): Promise<FlavorNote | null> => {
+  try {
+    const docRef = doc(db, 'flavorNotes', id);
+    const updateData = {
+      active,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await updateDoc(docRef, updateData);
+    
+    const updatedDoc = await getDoc(docRef);
+    if (updatedDoc.exists()) {
+      return {
+        id: updatedDoc.id,
+        ...updatedDoc.data()
+      } as FlavorNote;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error toggling flavor note status:', error);
+    throw error;
+  }
+};
+
 export const firebaseApi = {
-  // 커피 데이터 가져오기
+  // 커피 관련
+  getAllCoffees: async (): Promise<CoffeeApiData[]> => {
+    try {
+      const q = query(
+        collection(db, COFFEES_COLLECTION), 
+        where('active', '==', true),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as CoffeeApiData[];
+    } catch (error) {
+      console.error('Error getting all coffees:', error);
+      return [];
+    }
+  },
   getCoffeeById: async (id: string): Promise<CoffeeApiData | null> => {
     try {
       // 먼저 ID로 직접 조회
@@ -189,44 +470,6 @@ export const firebaseApi = {
       return null;
     }
   },
-
-  // 모든 활성 커피 데이터 가져오기
-  getAllCoffees: async (): Promise<CoffeeApiData[]> => {
-    try {
-      const q = query(
-        collection(db, COFFEES_COLLECTION), 
-        where('active', '==', true),
-        orderBy('createdAt', 'desc')
-      );
-      const querySnapshot = await getDocs(q);
-      
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as CoffeeApiData[];
-    } catch (error) {
-      console.error('Error getting all coffees:', error);
-      return [];
-    }
-  },
-
-  // 관리용: 모든 커피 데이터 가져오기
-  getAllCoffeesAdmin: async (): Promise<CoffeeApiData[]> => {
-    try {
-      const q = query(collection(db, COFFEES_COLLECTION), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as CoffeeApiData[];
-    } catch (error) {
-      console.error('Error getting all coffees for admin:', error);
-      return [];
-    }
-  },
-
-  // 실시간 커피 데이터 구독
   subscribeToCoffees: (callback: (coffees: CoffeeApiData[]) => void): (() => void) => {
     const q = query(collection(db, COFFEES_COLLECTION), orderBy('createdAt', 'desc'));
     
@@ -241,8 +484,6 @@ export const firebaseApi = {
       console.error('Error in coffee subscription:', error);
     });
   },
-
-  // 새 커피 생성
   createCoffee: async (coffeeData: Omit<CoffeeApiData, 'id'>): Promise<CoffeeApiData> => {
     try {
       const customId = generateCoffeeId(coffeeData.titleEn);
@@ -262,8 +503,6 @@ export const firebaseApi = {
       throw error;
     }
   },
-
-  // 커피 데이터 업데이트
   updateCoffee: async (id: string, updateData: Partial<CoffeeApiData>): Promise<CoffeeApiData | null> => {
     try {
       // 먼저 실제 문서 ID 찾기
@@ -302,8 +541,6 @@ export const firebaseApi = {
       throw error;
     }
   },
-
-  // 커피 삭제 (소프트 삭제)
   deleteCoffee: async (id: string): Promise<boolean> => {
     try {
       // 먼저 실제 문서 ID 찾기
@@ -333,9 +570,7 @@ export const firebaseApi = {
       return false;
     }
   },
-
-  // 커피 활성화
-  activateCoffee: async (id: string): Promise<boolean> => {
+  toggleCoffeeActive: async (id: string, active: boolean): Promise<boolean> => {
     try {
       // 먼저 실제 문서 ID 찾기
       let docRef = doc(db, COFFEES_COLLECTION, id);
@@ -355,28 +590,34 @@ export const firebaseApi = {
       }
       
       await updateDoc(docRef, { 
-        active: true,
+        active,
         updatedAt: new Date()
       });
       return true;
     } catch (error) {
-      console.error('Error activating coffee:', error);
+      console.error('Error toggling coffee status:', error);
       return false;
     }
   },
-
-  // NFC 데이터로 커피 정보 가져오기
-  getCoffeeByNFC: async (nfcData: string): Promise<CoffeeApiData | null> => {
-    // NFC 데이터를 파싱하여 커피 ID 추출
-    const coffeeId = nfcData.includes('eth') ? 'eth-001' : 
-                     nfcData.includes('col') ? 'col-001' : 
-                     nfcData.includes('gua') ? 'gua-001' : 'eth-001';
-    return firebaseApi.getCoffeeById(coffeeId);
+  
+  // 상품 관련
+  getAllProducts: async (): Promise<Product[]> => {
+    try {
+      const q = query(
+        collection(db, PRODUCTS_COLLECTION),
+        where('active', '==', true)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Product[];
+    } catch (error) {
+      console.error('Error getting all products:', error);
+      return [];
+    }
   },
-
-  // ===== 상품 관련 API =====
-
-  // 상품 ID로 단일 상품 가져오기
   getProductById: async (id: string): Promise<Product | null> => {
     try {
       const docRef = doc(db, PRODUCTS_COLLECTION, id);
@@ -401,43 +642,6 @@ export const firebaseApi = {
       return null;
     }
   },
-
-  // 모든 활성 상품 가져오기
-  getAllProducts: async (): Promise<Product[]> => {
-    try {
-      const q = query(
-        collection(db, PRODUCTS_COLLECTION),
-        where('active', '==', true)
-      );
-      const querySnapshot = await getDocs(q);
-      
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[];
-    } catch (error) {
-      console.error('Error getting all products:', error);
-      return [];
-    }
-  },
-
-  // 관리용: 모든 상품 가져오기 (활성/비활성 포함)
-  getAllProductsAdmin: async (): Promise<Product[]> => {
-    try {
-      const q = query(collection(db, PRODUCTS_COLLECTION));
-      const querySnapshot = await getDocs(q);
-      
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[];
-    } catch (error) {
-      console.error('Error getting all products for admin:', error);
-      return [];
-    }
-  },
-
-  // 실시간 상품 데이터 구독
   subscribeToProducts: (callback: (products: Product[]) => void): (() => void) => {
     const q = query(collection(db, PRODUCTS_COLLECTION));
     
@@ -452,8 +656,6 @@ export const firebaseApi = {
       console.error('Error in product subscription:', error);
     });
   },
-
-  // 새 상품 생성
   createProduct: async (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
     try {
       const customId = generateProductId(productData.category);
@@ -472,8 +674,6 @@ export const firebaseApi = {
       throw error;
     }
   },
-
-  // 상품 데이터 업데이트
   updateProduct: async (id: string, updateData: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<Product | null> => {
     try {
       let docRef = doc(db, PRODUCTS_COLLECTION, id);
@@ -511,8 +711,6 @@ export const firebaseApi = {
       throw error;
     }
   },
-
-  // 상품 삭제 (완전 삭제)
   deleteProduct: async (id: string): Promise<boolean> => {
     try {
       let docRef = doc(db, PRODUCTS_COLLECTION, id);
@@ -538,8 +736,6 @@ export const firebaseApi = {
       return false;
     }
   },
-
-  // 상품 활성/비활성 토글
   toggleProductActive: async (id: string, active: boolean): Promise<Product | null> => {
     try {
       return await firebaseApi.updateProduct(id, { active });
@@ -548,4 +744,18 @@ export const firebaseApi = {
       return null;
     }
   },
+  
+  // 풍미 노트 관련
+  getAllFlavorNotes,
+  getAllFlavorNotesAdmin,
+  getFlavorNoteById,
+  findFlavorNoteByName,
+  subscribeToFlavorNotes,
+  createFlavorNote,
+  updateFlavorNote,
+  deleteFlavorNote,
+  toggleFlavorNoteActive,
+  
+  // 초기화
+  initializeData
 }; 

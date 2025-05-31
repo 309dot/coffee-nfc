@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { M1CTLogo, ArrowRightIcon } from '../components/icons';
+import { FlavorNoteModal } from '../components/FlavorNoteModal';
 import { api, type CoffeeApiData } from '../services/api';
 
 export function Home() {
   const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedFlavorNote, setSelectedFlavorNote] = useState<string>('');
 
   useEffect(() => {
     const loadCoffeeData = async () => {
@@ -44,6 +47,16 @@ export function Home() {
     loadCoffeeData();
   }, []);
 
+  const handleFlavorNoteClick = (flavorNote: string) => {
+    setSelectedFlavorNote(flavorNote);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedFlavorNote('');
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col gap-1 min-h-screen justify-center items-center">
@@ -64,55 +77,68 @@ export function Home() {
   }
 
   return (
-    <div className="flex flex-col gap-1 min-h-screen">
-      {/* Title Section */}
-      <section className="bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center">
-        <div className="mb-auto">
-          <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight">
-            {coffee.titleKo}
-          </h1>
-          <p className="text-base font-light text-text-primary mt-2 tracking-tight">
-            {coffee.titleEn}
-          </p>
-        </div>
-        
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 mt-2">
-          {coffee.flavorNotes.map((note, index) => (
-            <Badge key={index}>
-              {note}
-            </Badge>
-          ))}
-        </div>
-      </section>
-
-      {/* Comment Card */}
-      <section className="rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
-        <div className="flex flex-col gap-2.5">
-          <p className="text-sm text-text-muted font-normal mb-2">
-            master comment
-          </p>
-          <p className="text-base font-bold text-text-primary">
-            "{coffee.masterComment}"
-          </p>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="rounded-2xl p-6" style={{ backgroundColor: '#FFBF8A' }}>
-        <div className="flex justify-between items-center gap-2">
-          {/* Logo */}
-          <M1CTLogo className="text-text-primary" />
-          
-          {/* Buy Button */}
-          <div className="flex items-center gap-2 px-4 py-2 border border-dark-navy rounded-full">
-            <span className="text-base font-bold text-text-primary">
-              buy whole bean
-            </span>
-            <ArrowRightIcon size={24} />
+    <>
+      <div className="flex flex-col gap-1 min-h-screen">
+        {/* Title Section */}
+        <section className="bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center">
+          <div className="mb-auto">
+            <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight break-keep word-break-keep">
+              {coffee.titleKo}
+            </h1>
+            <p className="text-base font-light text-text-primary mt-2 tracking-tight break-keep word-break-keep">
+              {coffee.titleEn}
+            </p>
           </div>
-        </div>
-      </section>
-    </div>
+          
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {coffee.flavorNotes.map((note, index) => (
+              <Badge 
+                key={index} 
+                className="break-keep word-break-keep"
+                onClick={() => handleFlavorNoteClick(note)}
+              >
+                {note}
+              </Badge>
+            ))}
+          </div>
+        </section>
+
+        {/* Comment Card */}
+        <section className="rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
+          <div className="flex flex-col gap-2.5">
+            <p className="text-sm text-text-muted font-normal mb-2 break-keep word-break-keep">
+              master comment
+            </p>
+            <p className="text-base font-bold text-text-primary break-keep word-break-keep">
+              "{coffee.masterComment}"
+            </p>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="rounded-2xl p-6" style={{ backgroundColor: '#FFBF8A' }}>
+          <div className="flex justify-between items-center gap-2">
+            {/* Logo */}
+            <M1CTLogo className="text-text-primary" />
+            
+            {/* Buy Button */}
+            <div className="flex items-center gap-2 px-4 py-2 border border-dark-navy rounded-full">
+              <span className="text-base font-bold text-text-primary break-keep word-break-keep">
+                buy whole bean
+              </span>
+              <ArrowRightIcon size={24} />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Flavor Note Modal */}
+      <FlavorNoteModal 
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        flavorNoteName={selectedFlavorNote}
+      />
+    </>
   );
 } 

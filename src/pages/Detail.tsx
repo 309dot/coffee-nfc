@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
+import { Badge } from '../components/ui/Badge';
+import { FlavorNoteModal } from '../components/FlavorNoteModal';
 import { api, type CoffeeApiData } from '../services/api';
 
 export function Detail() {
   const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedFlavorNote, setSelectedFlavorNote] = useState<string>('');
 
   useEffect(() => {
     const loadCoffeeData = async () => {
@@ -36,6 +40,16 @@ export function Detail() {
     window.scrollTo(0, 0);
   }, []);
 
+  const handleFlavorNoteClick = (flavorNote: string) => {
+    setSelectedFlavorNote(flavorNote);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedFlavorNote('');
+  };
+
   if (loading) {
     return (
       <div className="bg-white flex-1 flex flex-col items-center justify-center">
@@ -56,61 +70,90 @@ export function Detail() {
   }
 
   return (
-    <div className="bg-white flex-1 flex flex-col overflow-y-auto">
-      <div className="px-6 py-12 space-y-12">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-text-primary leading-tight">
-            {coffee.titleKo}
-          </h1>
-          <p className="text-base font-light text-text-primary">
-            {coffee.titleEn}
-          </p>
-        </div>
+    <>
+      <div className="bg-white flex-1 flex flex-col overflow-y-auto">
+        <div className="px-6 py-12 space-y-12">
+          {/* Header */}
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-text-primary leading-tight break-keep word-break-keep">
+              {coffee.titleKo}
+            </h1>
+            <p className="text-base font-light text-text-primary break-keep word-break-keep">
+              {coffee.titleEn}
+            </p>
+          </div>
 
-        {/* Coffee Details */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <p className="text-base text-text-muted">
-              varieties
-            </p>
-            <p className="text-base font-semibold text-text-primary">
-              {coffee.variety}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-base text-text-muted">
-              process
-            </p>
-            <p className="text-base font-semibold text-text-primary">
-              {coffee.process}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-base text-text-muted">
-              region
-            </p>
-            <p className="text-base font-semibold text-text-primary">
-              {coffee.region}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-base text-text-muted">
-              altitude
-            </p>
-            <p className="text-base font-semibold text-text-primary">
-              {coffee.altitude}
-            </p>
-          </div>
-        </div>
+          {/* Flavor Notes */}
+          {coffee.flavorNotes && coffee.flavorNotes.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-base font-semibold text-text-primary break-keep word-break-keep">
+                풍미 노트
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {coffee.flavorNotes.map((note, index) => (
+                  <Badge 
+                    key={index} 
+                    className="break-keep word-break-keep"
+                    onClick={() => handleFlavorNoteClick(note)}
+                  >
+                    {note}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {/* Description */}
-        <div className="space-y-2.5 pb-6">
-          <p className="text-base text-text-primary leading-relaxed whitespace-pre-line">
-            {coffee.description}
-          </p>
+          {/* Coffee Details */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <p className="text-base text-text-muted break-keep word-break-keep">
+                varieties
+              </p>
+              <p className="text-base font-semibold text-text-primary break-keep word-break-keep">
+                {coffee.variety}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-base text-text-muted break-keep word-break-keep">
+                process
+              </p>
+              <p className="text-base font-semibold text-text-primary break-keep word-break-keep">
+                {coffee.process}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-base text-text-muted break-keep word-break-keep">
+                region
+              </p>
+              <p className="text-base font-semibold text-text-primary break-keep word-break-keep">
+                {coffee.region}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-base text-text-muted break-keep word-break-keep">
+                altitude
+              </p>
+              <p className="text-base font-semibold text-text-primary break-keep word-break-keep">
+                {coffee.altitude}
+              </p>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2.5 pb-6">
+            <p className="text-base text-text-primary leading-relaxed whitespace-pre-line break-keep word-break-keep">
+              {coffee.description}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Flavor Note Modal */}
+      <FlavorNoteModal 
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        flavorNoteName={selectedFlavorNote}
+      />
+    </>
   );
 } 

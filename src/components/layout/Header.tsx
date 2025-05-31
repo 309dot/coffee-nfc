@@ -5,7 +5,7 @@ interface HeaderProps {
   className?: string;
 }
 
-export function Header({ variant = 'default', className = '' }: HeaderProps) {
+export function Header({ variant: _variant = 'default', className = '' }: HeaderProps) {
   const handleInstagramClick = () => {
     window.open('https://www.instagram.com/m1ct.coffee/', '_blank');
   };
@@ -18,9 +18,7 @@ export function Header({ variant = 'default', className = '' }: HeaderProps) {
   const getContainerClasses = () => {
     const baseClasses = "fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-2";
     
-    if (variant === 'shop') {
-      return `${baseClasses} bg-white border-b border-gray-100`;
-    }
+    // 모든 variant에서 동일한 스타일 적용 (border 제거)
     return `${baseClasses} bg-white`;
   };
 
