@@ -152,21 +152,21 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
         <div className="flex gap-2">
           <button
             onClick={copyHomeUrl}
-            className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
             title="홈 URL 복사"
           >
             <Icons.Link className="w-4 h-4" />
           </button>
           <button
             onClick={() => onEdit(coffee.id)}
-            className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
             title="편집"
           >
             <Icons.Edit className="w-4 h-4" />
           </button>
           <button
             onClick={() => onToggleActive(coffee.id, !coffee.active)}
-            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
               coffee.active
                 ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
                 : 'bg-green-100 text-green-600 hover:bg-green-200'
@@ -177,7 +177,7 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
           </button>
           <button
             onClick={() => onDelete(coffee.id)}
-            className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
             title="삭제"
           >
             <Icons.Delete className="w-4 h-4" />
@@ -273,21 +273,21 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
         <div className="flex gap-2">
           <button
             onClick={copyHomeUrl}
-            className="flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
             title="홈 URL 복사"
           >
             <Icons.Link className="w-4 h-4" />
           </button>
           <button
             onClick={() => onEdit(product.id)}
-            className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
             title="편집"
           >
             <Icons.Edit className="w-4 h-4" />
           </button>
           <button
             onClick={() => onToggleActive(product.id, !product.active)}
-            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
               product.active
                 ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
                 : 'bg-green-100 text-green-600 hover:bg-green-200'
@@ -298,7 +298,7 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
           </button>
           <button
             onClick={() => onDelete(product.id)}
-            className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
             title="삭제"
           >
             <Icons.Delete className="w-4 h-4" />
@@ -758,116 +758,114 @@ export function Dashboard() {
 
         {/* Filter and Sort Controls + Add Button - 풍미노트 탭에서는 숨김 */}
         {activeTab !== 'flavorNotes' && (
-          <div className="flex flex-col gap-4">
-            {/* 컴팩트한 필터 및 추가 버튼 */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-              {/* 왼쪽: 검색/필터/정렬 */}
-              <div className="flex flex-col sm:flex-row gap-2 flex-1">
-                {/* 검색 */}
-                <div className="relative flex-1 sm:max-w-xs">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder={`${activeTab === 'coffee' ? '커피명, 원산지, 풍미노트' : '상품명, 카테고리'} 검색`}
-                    className="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-text-primary focus:border-text-primary transition-colors"
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  {searchTerm && (
-                    <button
-                      onClick={resetSearch}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    >
-                      <Icons.Close className="w-4 h-4" />
-                    </button>
-                  )}
+          <div className="flex flex-col gap-3">
+            {/* 컴팩트한 필터 및 추가 버튼 - 모바일 최적화 */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {/* 검색 */}
+              <div className="relative flex-1 min-w-0 sm:min-w-[200px] sm:max-w-xs">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={`${activeTab === 'coffee' ? '커피명, 원산지' : '상품명, 카테고리'} 검색`}
+                  className="w-full pl-8 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-text-primary focus:border-text-primary transition-colors"
+                />
+                <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                  <svg className="h-3.5 w-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </div>
-
-                {/* 상태 필터 드롭다운 */}
-                <div className="relative">
-                  <select
-                    value={activeTab === 'coffee' ? coffeeFilter : productFilter}
-                    onChange={(e) => {
-                      if (activeTab === 'coffee') {
-                        setCoffeeFilter(e.target.value as 'all' | 'active' | 'inactive');
-                      } else {
-                        setProductFilter(e.target.value as 'all' | 'active' | 'inactive');
-                      }
-                    }}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-text-primary focus:border-text-primary transition-colors cursor-pointer"
-                  >
-                    <option value="all">전체 상태</option>
-                    <option value="active">활성만</option>
-                    <option value="inactive">비활성만</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* 정렬 드롭다운 */}
-                <div className="relative">
-                  <select
-                    value={activeTab === 'coffee' ? coffeeSort : productSort}
-                    onChange={(e) => {
-                      if (activeTab === 'coffee') {
-                        setCoffeeSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price');
-                      } else {
-                        setProductSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price' | 'category');
-                      }
-                    }}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-text-primary focus:border-text-primary transition-colors cursor-pointer"
-                  >
-                    <option value="newest">최신순</option>
-                    <option value="oldest">오래된순</option>
-                    <option value="name">이름순</option>
-                    <option value="price">가격순</option>
-                    {activeTab === 'products' && (
-                      <option value="category">카테고리순</option>
-                    )}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* 필터 초기화 버튼 (필터가 적용된 경우에만 표시) */}
-                {getActiveFiltersCount() > 0 && (
+                {searchTerm && (
                   <button
-                    onClick={() => {
-                      resetSearch();
-                      resetStatusFilter();
-                      resetSort();
-                    }}
-                    className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
-                    title="모든 필터 초기화"
+                    onClick={resetSearch}
+                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-gray-400 hover:text-gray-600"
                   >
-                    초기화
+                    <Icons.Close className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* 오른쪽: 새 아이템 추가 버튼 */}
+              {/* 상태 필터 드롭다운 */}
+              <div className="relative">
+                <select
+                  value={activeTab === 'coffee' ? coffeeFilter : productFilter}
+                  onChange={(e) => {
+                    if (activeTab === 'coffee') {
+                      setCoffeeFilter(e.target.value as 'all' | 'active' | 'inactive');
+                    } else {
+                      setProductFilter(e.target.value as 'all' | 'active' | 'inactive');
+                    }
+                  }}
+                  className="appearance-none bg-white border border-gray-300 rounded-lg pl-3 pr-7 py-2 text-sm focus:ring-2 focus:ring-text-primary focus:border-text-primary transition-colors cursor-pointer min-w-[90px]"
+                >
+                  <option value="all">전체</option>
+                  <option value="active">활성</option>
+                  <option value="inactive">비활성</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* 정렬 드롭다운 */}
+              <div className="relative">
+                <select
+                  value={activeTab === 'coffee' ? coffeeSort : productSort}
+                  onChange={(e) => {
+                    if (activeTab === 'coffee') {
+                      setCoffeeSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price');
+                    } else {
+                      setProductSort(e.target.value as 'newest' | 'oldest' | 'name' | 'price' | 'category');
+                    }
+                  }}
+                  className="appearance-none bg-white border border-gray-300 rounded-lg pl-3 pr-7 py-2 text-sm focus:ring-2 focus:ring-text-primary focus:border-text-primary transition-colors cursor-pointer min-w-[90px]"
+                >
+                  <option value="newest">최신순</option>
+                  <option value="oldest">오래된순</option>
+                  <option value="name">이름순</option>
+                  <option value="price">가격순</option>
+                  {activeTab === 'products' && (
+                    <option value="category">카테고리순</option>
+                  )}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* 필터 초기화 버튼 (필터가 적용된 경우에만 표시) */}
+              {getActiveFiltersCount() > 0 && (
+                <button
+                  onClick={() => {
+                    resetSearch();
+                    resetStatusFilter();
+                    resetSort();
+                  }}
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap min-h-[36px]"
+                  title="모든 필터 초기화"
+                >
+                  <Icons.Close className="w-3.5 h-3.5" />
+                </button>
+              )}
+
+              {/* 새 아이템 추가 버튼 */}
               <button
                 onClick={() => activeTab === 'coffee' ? setShowForm(true) : setShowProductForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors whitespace-nowrap min-h-[36px] touch-manipulation"
               >
                 <Icons.Add className="w-4 h-4" />
-                새 {activeTab === 'coffee' ? '커피' : '상품'} 추가
+                <span className="hidden sm:inline">새 {activeTab === 'coffee' ? '커피' : '상품'} 추가</span>
+                <span className="sm:hidden">추가</span>
               </button>
             </div>
 
             {/* 결과 요약 (필터가 적용된 경우에만 표시) */}
             {getActiveFiltersCount() > 0 && (
-              <div className="bg-gray-50 px-4 py-2 rounded-lg">
+              <div className="bg-gray-50 px-3 py-2 rounded-lg">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div className="text-sm text-gray-700">
                     <span className="font-medium">
@@ -882,7 +880,7 @@ export function Dashboard() {
                   <div className="flex flex-wrap gap-1">
                     {searchTerm && (
                       <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
-                        "{searchTerm}"
+                        "{searchTerm.length > 10 ? searchTerm.substring(0, 10) + '...' : searchTerm}"
                         <button onClick={resetSearch} className="ml-1 hover:text-blue-900">
                           <Icons.Close className="w-3 h-3" />
                         </button>
@@ -922,19 +920,6 @@ export function Dashboard() {
                 </div>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Add Button - 풍미노트 탭에서만 표시 */}
-        {activeTab === 'flavorNotes' && (
-          <div className="flex justify-end">
-            <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 px-4 py-3 bg-text-primary text-white rounded-xl hover:bg-text-primary/90 transition-colors"
-            >
-              <Icons.Add className="w-5 h-5" />
-              새 풍미노트 추가
-            </button>
           </div>
         )}
 
