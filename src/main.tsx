@@ -3,11 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
-import { updateManifestStartUrl, restoreAppState, hideSplashScreen } from './utils/pwaUtils'
-
-// PWA 설정 초기화
-updateManifestStartUrl();
-restoreAppState();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -42,6 +37,3 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-
-// 스플래시 스크린 숨기기
-hideSplashScreen();

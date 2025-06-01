@@ -19,7 +19,31 @@ function App() {
   useEffect(() => {
     // Firebase 초기 데이터 설정
     initializeData();
+    
+    // PWA에서 시작된 경우 저장된 URL 확인
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      const savedUrl = localStorage.getItem('pwa-last-url');
+      if (savedUrl && savedUrl !== window.location.href) {
+        window.location.href = savedUrl;
+      }
+    }
+    
+    // 현재 URL 저장 (페이지 변경 시마다)
+    localStorage.setItem('pwa-last-url', window.location.href);
   }, []);
+
+  useEffect(() => {
+    // URL이 변경될 때마다 저장
+    localStorage.setItem('pwa-last-url', window.location.href);
+    
+    // Service Worker에도 전달
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SAVE_CURRENT_URL',
+        url: window.location.href
+      });
+    }
+  }, [page, coffeeId]);
 
   useEffect(() => {
     // URL 파라미터 확인
@@ -99,13 +123,19 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const coffeeId = urlParams.get('coffee');
     
+    let newUrl = '';
     if (newTab === 'details') {
-      window.history.pushState({}, '', `/?page=details${coffeeId ? `&coffee=${coffeeId}` : ''}`);
+      newUrl = `/?page=details${coffeeId ? `&coffee=${coffeeId}` : ''}`;
     } else if (newTab === 'shop') {
-      window.history.pushState({}, '', `/?page=shop${coffeeId ? `&coffee=${coffeeId}` : ''}`);
+      newUrl = `/?page=shop${coffeeId ? `&coffee=${coffeeId}` : ''}`;
     } else {
-      window.history.pushState({}, '', `/${coffeeId ? `?coffee=${coffeeId}` : ''}`);
+      newUrl = `/${coffeeId ? `?coffee=${coffeeId}` : ''}`;
     }
+    
+    window.history.pushState({}, '', newUrl);
+    
+    // 새 URL 저장
+    localStorage.setItem('pwa-last-url', window.location.origin + newUrl);
   };
 
   return (

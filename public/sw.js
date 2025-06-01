@@ -5,6 +5,9 @@ const urlsToCache = [
   '/manifest.json'
 ];
 
+// 현재 URL 저장을 위한 키
+const CURRENT_URL_KEY = 'current-url';
+
 // Install event - cache resources
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -21,6 +24,19 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // 현재 URL 저장 (GET 요청인 경우만)
+  if (event.request.method === 'GET' && event.request.url.includes(self.location.origin)) {
+    self.clients.matchAll().then(clients => {
+      if (clients.length > 0) {
+        // IndexedDB에 현재 URL 저장
+        const url = new URL(event.request.url);
+        if (url.pathname !== '/sw.js' && !url.pathname.includes('.')) {
+          localStorage.setItem(CURRENT_URL_KEY, event.request.url);
+        }
+      }
+    });
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -65,6 +81,18 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// PWA 시작 시 저장된 URL로 리다이렉트
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GET_SAVED_URL') {
+    const savedUrl = localStorage.getItem(CURRENT_URL_KEY);
+    event.ports[0].postMessage({ savedUrl });
+  }
+  
+  if (event.data && event.data.type === 'SAVE_CURRENT_URL') {
+    localStorage.setItem(CURRENT_URL_KEY, event.data.url);
+  }
+});
+
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
   if (event.tag === 'background-sync') {
@@ -81,8 +109,8 @@ self.addEventListener('push', (event) => {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
+      icon: '/favicon.svg',
+      badge: '/favicon.svg',
       data: data.data
     };
 
