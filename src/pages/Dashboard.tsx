@@ -111,13 +111,15 @@ function InputSelect({
   onChange, 
   options, 
   placeholder = "선택하세요",
-  onAddNew
+  onAddNew,
+  onSelect
 }: {
   value: string;
   onChange: (value: string) => void;
   options: Array<{ id: string; value: string; label: string; emoji?: string }>;
   placeholder?: string;
   onAddNew?: () => void;
+  onSelect?: (value: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -131,22 +133,16 @@ function InputSelect({
     const newValue = e.target.value;
     setInputValue(newValue);
     setIsOpen(true);
-    
-    // 정확히 일치하는 옵션이 있으면 선택
-    const exactMatch = options.find(option => 
-      option.label === newValue || option.value === newValue
-    );
-    if (exactMatch) {
-      onChange(exactMatch.value);
-    } else {
-      onChange('');
-    }
+    onChange(''); // 검색 중에는 선택값 초기화
   };
 
   const selectOption = (option: { value: string; label: string }) => {
-    setInputValue(option.label);
-    onChange(option.value);
+    setInputValue(''); // 선택 후 입력값 초기화
+    onChange('');
     setIsOpen(false);
+    if (onSelect) {
+      onSelect(option.value); // 선택 시 즉시 콜백 호출
+    }
   };
 
   return (
@@ -302,35 +298,23 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
       <div className="absolute top-4 right-4 flex items-center gap-3">
         {/* 활성화 토글 */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">활성화</span>
+          <span className="text-sm font-medium text-gray-700">
+            {coffee.active ? '활성화' : '비활성화'}
+          </span>
           <ToggleButton
             checked={coffee.active}
             onChange={(checked) => onToggleActive(coffee.id, checked)}
           />
         </div>
-        
-        {/* 삭제 버튼 */}
-        <button
-          onClick={() => onDelete(coffee.id)}
-          className="flex items-center justify-center w-8 h-8 bg-red-50 text-red-500 rounded-full hover:bg-red-100 transition-colors"
-          title="삭제"
-        >
-          <Icons.Delete className="w-4 h-4" />
-        </button>
       </div>
 
       {/* 제목과 가격 */}
       <div className="pr-20 mb-4">
-        <h3 className={`text-xl font-bold mb-1 ${
+        <h3 className={`text-xl font-bold mb-3 ${
           coffee.active ? 'text-gray-900' : 'text-gray-400'
         }`}>
           {coffee.titleKo}
         </h3>
-        <p className={`text-base mb-3 ${
-          coffee.active ? 'text-gray-600' : 'text-gray-400'
-        }`}>
-          {coffee.titleEn}
-        </p>
         <div className="text-lg font-semibold text-gray-900">
           ₩{(coffee.price || 0).toLocaleString()}
         </div>
@@ -385,6 +369,13 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
         >
           <Icons.Edit className="w-4 h-4" />
         </button>
+        <button
+          onClick={() => onDelete(coffee.id)}
+          className="flex items-center justify-center w-10 h-10 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
+          title="삭제"
+        >
+          <Icons.Delete className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
@@ -413,51 +404,33 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
       <div className="absolute top-4 right-4 flex items-center gap-3">
         {/* 활성화 토글 */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">활성화</span>
+          <span className="text-sm font-medium text-gray-700">
+            {product.active ? '활성화' : '비활성화'}
+          </span>
           <ToggleButton
             checked={product.active}
             onChange={(checked) => onToggleActive(product.id, checked)}
           />
         </div>
-        
-        {/* 삭제 버튼 */}
-        <button
-          onClick={() => onDelete(product.id)}
-          className="flex items-center justify-center w-8 h-8 bg-red-50 text-red-500 rounded-full hover:bg-red-100 transition-colors"
-          title="삭제"
-        >
-          <Icons.Delete className="w-4 h-4" />
-        </button>
       </div>
 
       {/* 제목과 가격 */}
       <div className="pr-20 mb-4">
-        <h3 className={`text-xl font-bold mb-1 ${
+        {/* 카테고리 */}
+        <div className="mb-2">
+          <span className="text-sm font-medium text-gray-600">
+            {product.category}
+          </span>
+        </div>
+        
+        <h3 className={`text-xl font-bold mb-3 ${
           product.active ? 'text-gray-900' : 'text-gray-400'
         }`}>
           {product.titleKo}
         </h3>
-        {product.titleEn && (
-          <p className={`text-base mb-3 ${
-            product.active ? 'text-gray-600' : 'text-gray-400'
-          }`}>
-            {product.titleEn}
-          </p>
-        )}
         <div className="text-lg font-semibold text-gray-900">
           ₩{product.price.toLocaleString()}
         </div>
-      </div>
-
-      {/* 카테고리 */}
-      <div className="mb-4">
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-          product.active 
-            ? 'bg-blue-50 text-blue-700' 
-            : 'bg-gray-100 text-gray-400'
-        }`}>
-          {product.category}
-        </span>
       </div>
 
       {/* 액션 버튼들 */}
@@ -475,6 +448,13 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
           title="편집"
         >
           <Icons.Edit className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onDelete(product.id)}
+          className="flex items-center justify-center w-10 h-10 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
+          title="삭제"
+        >
+          <Icons.Delete className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -815,11 +795,11 @@ export function Dashboard() {
     }
   };
 
-  const addFlavorNote = () => {
-    if (selectedFlavorNote && !formData.flavorNotes.includes(selectedFlavorNote)) {
+  const addFlavorNote = (noteValue: string) => {
+    if (noteValue && !formData.flavorNotes.includes(noteValue)) {
       setFormData(prev => ({
         ...prev,
-        flavorNotes: [...prev.flavorNotes, selectedFlavorNote]
+        flavorNotes: [...prev.flavorNotes, noteValue]
       }));
       setSelectedFlavorNote('');
     }
@@ -1341,22 +1321,15 @@ export function Dashboard() {
                   <label className="block text-sm font-medium text-text-primary mb-1">
                     풍미 노트
                   </label>
-                  <div className="flex gap-2 mb-2">
+                  <div className="mb-2">
                     <InputSelect
                       value={selectedFlavorNote}
                       onChange={setSelectedFlavorNote}
                       options={flavorNoteOptions}
                       placeholder="풍미 노트를 검색하거나 선택하세요"
                       onAddNew={() => setShowFlavorNoteForm(true)}
+                      onSelect={(value) => addFlavorNote(value)}
                     />
-                    <button
-                      onClick={addFlavorNote}
-                      type="button"
-                      className="px-4 py-2 bg-text-primary text-white rounded-lg hover:bg-text-primary/90"
-                      disabled={!selectedFlavorNote}
-                    >
-                      추가
-                    </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {formData.flavorNotes.map((note, index) => (
