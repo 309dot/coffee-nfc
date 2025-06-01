@@ -888,6 +888,58 @@ export function Dashboard() {
     setNewFlavorNoteData(prev => ({ ...prev, [field]: value }));
   };
 
+  // 중복 체크 함수들 추가
+  const getDuplicateError = (field: 'titleKo' | 'titleEn', value: string) => {
+    if (!value.trim()) return '';
+    
+    const duplicate = coffees.find(coffee => 
+      coffee[field].toLowerCase() === value.toLowerCase() && 
+      (!editingCoffee || coffee.id !== editingCoffee.id)
+    );
+    
+    return duplicate ? `이미 "${value}"로 등록된 커피가 있습니다.` : '';
+  };
+
+  // 실시간 중복 체크
+  const titleKoError = getDuplicateError('titleKo', formData.titleKo);
+  const titleEnError = getDuplicateError('titleEn', formData.titleEn);
+
+  // Product form 중복 체크
+  const getProductDuplicateError = (field: 'titleKo' | 'titleEn', value: string) => {
+    if (!value.trim()) return '';
+    
+    const duplicate = products.find(product => 
+      product[field]?.toLowerCase() === value.toLowerCase() && 
+      (!editingProduct || product.id !== editingProduct.id)
+    );
+    
+    return duplicate ? `이미 "${value}"로 등록된 상품이 있습니다.` : '';
+  };
+
+  const productTitleKoError = getProductDuplicateError('titleKo', productFormData.titleKo);
+  const productTitleEnError = getProductDuplicateError('titleEn', productFormData.titleEn);
+
+  // 전체 삭제 함수 추가
+  const handleDeleteAll = async () => {
+    if (!window.confirm('정말로 모든 커피를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    if (!window.confirm('마지막 확인: 정말로 모든 커피 데이터를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      // 모든 커피 삭제
+      const deletePromises = coffees.map(coffee => firebaseApi.deleteCoffee(coffee.id));
+      await Promise.all(deletePromises);
+      showToast(`${coffees.length}개의 커피가 모두 삭제되었습니다.`);
+    } catch (error) {
+      console.error('Error deleting all coffees:', error);
+      showToast('전체 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-bg-primary p-4 sm:p-6 lg:p-8">
@@ -913,19 +965,27 @@ export function Dashboard() {
           
           {/* 개발 모드 도구 */}
           {import.meta.env.DEV && (
-            <button
-              onClick={async () => {
-                const success = await addSampleCoffees();
-                if (success) {
-                  showToast('샘플 커피 4개가 추가되었습니다!');
-                } else {
-                  showToast('샘플 커피 추가 중 오류가 발생했습니다.');
-                }
-              }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-            >
-              샘플 커피 추가
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  const success = await addSampleCoffees();
+                  if (success) {
+                    showToast('샘플 커피 4개가 추가되었습니다!');
+                  } else {
+                    showToast('샘플 커피 추가 중 오류가 발생했습니다.');
+                  }
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+              >
+                샘플 커피 추가
+              </button>
+              <button
+                onClick={handleDeleteAll}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+              >
+                전체 삭제
+              </button>
+            </div>
           )}
         </div>
 
@@ -1219,8 +1279,15 @@ export function Dashboard() {
                       type="text"
                       value={formData.titleKo}
                       onChange={(e) => handleInputChange('titleKo', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 transition-colors ${
+                        titleKoError 
+                          ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+                          : 'border-gray-300 focus:ring-text-primary'
+                      }`}
                     />
+                    {titleKoError && (
+                      <p className="text-red-500 text-xs mt-1">{titleKoError}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">
@@ -1230,8 +1297,15 @@ export function Dashboard() {
                       type="text"
                       value={formData.titleEn}
                       onChange={(e) => handleInputChange('titleEn', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 transition-colors ${
+                        titleEnError 
+                          ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+                          : 'border-gray-300 focus:ring-text-primary'
+                      }`}
                     />
+                    {titleEnError && (
+                      <p className="text-red-500 text-xs mt-1">{titleEnError}</p>
+                    )}
                   </div>
                 </div>
 
@@ -1385,7 +1459,8 @@ export function Dashboard() {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors"
+                  disabled={!!titleKoError || !!titleEnError || !formData.titleKo.trim() || !formData.titleEn.trim()}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Icons.Save className="w-4 h-4" />
                   {editingCoffee ? '수정' : '저장'}
@@ -1449,9 +1524,16 @@ export function Dashboard() {
                       type="text"
                       value={productFormData.titleKo}
                       onChange={(e) => handleProductInputChange('titleKo', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 transition-colors ${
+                        productTitleKoError 
+                          ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+                          : 'border-gray-300 focus:ring-text-primary'
+                      }`}
                       placeholder="예: 에티오피아 드립백"
                     />
+                    {productTitleKoError && (
+                      <p className="text-red-500 text-xs mt-1">{productTitleKoError}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">
@@ -1461,9 +1543,16 @@ export function Dashboard() {
                       type="text"
                       value={productFormData.titleEn}
                       onChange={(e) => handleProductInputChange('titleEn', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 transition-colors ${
+                        productTitleEnError 
+                          ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+                          : 'border-gray-300 focus:ring-text-primary'
+                      }`}
                       placeholder="예: Ethiopia Drip Bag"
                     />
+                    {productTitleEnError && (
+                      <p className="text-red-500 text-xs mt-1">{productTitleEnError}</p>
+                    )}
                   </div>
                 </div>
 
@@ -1546,7 +1635,8 @@ export function Dashboard() {
                 </button>
                 <button
                   onClick={handleProductSave}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors"
+                  disabled={!!productTitleKoError || !!productTitleEnError || !productFormData.titleKo.trim() || !productFormData.category.trim() || productFormData.price <= 0}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Icons.Save className="w-4 h-4" />
                   {editingProduct ? '수정' : '저장'}
