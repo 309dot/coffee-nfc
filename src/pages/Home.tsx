@@ -13,6 +13,10 @@ export function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedFlavorNote, setSelectedFlavorNote] = useState<string>('');
 
+  // 랜덤 아바타 이모지 배열
+  const avatarEmojis = ['👨‍💼', '👩‍💼', '👨‍🎓', '👩‍🎓', '👨‍🍳', '👩‍🍳', '👨‍💻', '👩‍💻', '😊', '😎', '🤓', '😇', '🙂', '😌'];
+  const randomAvatar = avatarEmojis[Math.floor(Math.random() * avatarEmojis.length)];
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -139,11 +143,9 @@ export function Home() {
         {/* Comment Card */}
         <section className="relative z-10 rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
           <div className="flex flex-col gap-2">
-            {/* Avatar - Apple Style */}
-            <div className="w-8 h-8 rounded-full overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm">
-                M
-              </div>
+            {/* Avatar - Emoji Style */}
+            <div className="w-8 h-8 flex items-center justify-center text-2xl">
+              {randomAvatar}
             </div>
             
             {/* Text Content - Left Aligned */}
