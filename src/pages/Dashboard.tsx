@@ -5,6 +5,8 @@ import { FlavorNoteManager } from '../components/FlavorNoteManager';
 import type { CoffeeApiData } from '../services/api';
 import * as firebaseApi from '../services/firebaseApi';
 import type { Product, FlavorNote } from '../types';
+// 개발 모드에서만 import
+import { addSampleCoffees } from '../utils/addSampleCoffees';
 
 interface CoffeeCardProps {
   coffee: CoffeeApiData;
@@ -90,9 +92,9 @@ function ToggleButton({ checked, onChange, disabled = false }: {
       type="button"
       onClick={() => onChange(!checked)}
       disabled={disabled}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-text-primary focus:ring-offset-2 ${
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
         checked 
-          ? 'bg-text-primary' 
+          ? 'bg-blue-500' 
           : 'bg-gray-200'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
@@ -308,16 +310,13 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
         </div>
       </div>
 
-      {/* 제목과 가격 */}
+      {/* 제목 */}
       <div className="pr-20 mb-4">
         <h3 className={`text-xl font-bold mb-3 ${
           coffee.active ? 'text-gray-900' : 'text-gray-400'
         }`}>
           {coffee.titleKo}
         </h3>
-        <div className="text-lg font-semibold text-gray-900">
-          ₩{(coffee.price || 0).toLocaleString()}
-        </div>
       </div>
 
       {/* 풍미 노트 배지 */}
@@ -342,14 +341,6 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
               </span>
             )}
           </div>
-        </div>
-      )}
-
-      {/* 원산지 정보 */}
-      {coffee.country && (
-        <div className="mb-4 flex items-center gap-1 text-sm text-gray-600">
-          <span className="text-red-500">📍</span>
-          <span>{coffee.country}{coffee.region && `, ${coffee.region}`}</span>
         </div>
       )}
 
@@ -926,6 +917,23 @@ export function Dashboard() {
             <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">관리 대시보드</h1>
             <p className="text-text-muted">커피, 상품, 풍미노트를 통합 관리하세요</p>
           </div>
+          
+          {/* 개발 모드 도구 */}
+          {import.meta.env.DEV && (
+            <button
+              onClick={async () => {
+                const success = await addSampleCoffees();
+                if (success) {
+                  showToast('샘플 커피 4개가 추가되었습니다!');
+                } else {
+                  showToast('샘플 커피 추가 중 오류가 발생했습니다.');
+                }
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+            >
+              샘플 커피 추가
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
