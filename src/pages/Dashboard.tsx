@@ -71,8 +71,211 @@ const Icons = {
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
     </svg>
+  ),
+  ChevronDown: ({ className = "w-4 h-4" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
   )
 };
+
+// 토글 버튼 컴포넌트
+function ToggleButton({ checked, onChange, disabled = false }: { 
+  checked: boolean; 
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      disabled={disabled}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-text-primary focus:ring-offset-2 ${
+        checked 
+          ? 'bg-text-primary' 
+          : 'bg-gray-200'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+          checked ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
+  );
+}
+
+// 인풋 셀렉트 박스 컴포넌트
+function InputSelect({ 
+  value, 
+  onChange, 
+  options, 
+  placeholder = "선택하세요",
+  onAddNew
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ id: string; value: string; label: string; emoji?: string }>;
+  placeholder?: string;
+  onAddNew?: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
+
+  const filteredOptions = options.filter(option =>
+    option.label.toLowerCase().includes(inputValue.toLowerCase()) ||
+    option.value.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    setIsOpen(true);
+    
+    // 정확히 일치하는 옵션이 있으면 선택
+    const exactMatch = options.find(option => 
+      option.label === newValue || option.value === newValue
+    );
+    if (exactMatch) {
+      onChange(exactMatch.value);
+    } else {
+      onChange('');
+    }
+  };
+
+  const selectOption = (option: { value: string; label: string }) => {
+    setInputValue(option.label);
+    onChange(option.value);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+          className="w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-text-primary"
+          placeholder={placeholder}
+        />
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="absolute inset-y-0 right-0 flex items-center pr-3"
+        >
+          <Icons.ChevronDown className="w-4 h-4 text-gray-400" />
+        </button>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => selectOption(option)}
+                className="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+              >
+                {option.emoji && <span>{option.emoji}</span>}
+                <span>{option.label}</span>
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-2 text-gray-500 text-center">
+              검색 결과가 없습니다.
+              {onAddNew && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onAddNew();
+                    setIsOpen(false);
+                  }}
+                  className="block w-full mt-2 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  새로 등록하기
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 가격 입력 컴포넌트
+function PriceInput({ 
+  value, 
+  onChange, 
+  placeholder = "0" 
+}: { 
+  value: number; 
+  onChange: (value: number) => void;
+  placeholder?: string;
+}) {
+  const [displayValue, setDisplayValue] = useState(value ? value.toLocaleString() : '');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/[^\d]/g, ''); // 숫자만 추출
+    const numericValue = parseInt(inputValue) || 0;
+    
+    setDisplayValue(numericValue ? numericValue.toLocaleString() : '');
+    onChange(numericValue);
+  };
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        value={displayValue}
+        onChange={handleChange}
+        className="w-full px-3 py-2 pr-8 border rounded-lg focus:ring-2 focus:ring-text-primary"
+        placeholder={placeholder}
+      />
+      <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+        원
+      </span>
+    </div>
+  );
+}
+
+// 고도 입력 컴포넌트
+function AltitudeInput({ 
+  value, 
+  onChange, 
+  placeholder = "0" 
+}: { 
+  value: string; 
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const [displayValue, setDisplayValue] = useState(value.replace('m', ''));
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/[^\d,]/g, ''); // 숫자와 콤마만 허용
+    setDisplayValue(inputValue);
+    onChange(inputValue + 'm');
+  };
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        value={displayValue}
+        onChange={handleChange}
+        className="w-full px-3 py-2 pr-8 border rounded-lg focus:ring-2 focus:ring-text-primary"
+        placeholder={placeholder}
+      />
+      <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+        m
+      </span>
+    </div>
+  );
+}
 
 function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProps) {
   const baseUrl = window.location.origin;
@@ -332,6 +535,9 @@ export function Dashboard() {
     category: ''
   });
 
+  // 토스트 메시지
+  const { toast, showToast, hideToast } = useToast();
+
   // 새로운 필터링 및 정렬 상태
   const [coffeeFilter, setCoffeeFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [productFilter, setProductFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -366,6 +572,14 @@ export function Dashboard() {
     imageUrl: '',
     active: true
   });
+
+  // 풍미 노트 옵션 데이터 변환
+  const flavorNoteOptions = flavorNotes.map(note => ({
+    id: note.id,
+    value: note.titleKo,
+    label: note.titleKo,
+    emoji: note.emoji
+  }));
 
   // Firebase 실시간 데이터 구독
   useEffect(() => {
@@ -586,9 +800,10 @@ export function Dashboard() {
       try {
         await firebaseApi.deleteCoffee(id);
         setCoffees(prev => prev.filter(c => c.id !== id));
+        showToast('커피가 삭제되었습니다.');
       } catch (error) {
         console.error('Error deleting coffee:', error);
-        alert('커피 삭제 중 오류가 발생했습니다.');
+        showToast('커피 삭제 중 오류가 발생했습니다.');
       }
     }
   };
@@ -598,9 +813,10 @@ export function Dashboard() {
       try {
         await firebaseApi.deleteProduct(id);
         setProducts(prev => prev.filter(p => p.id !== id));
+        showToast('상품이 삭제되었습니다.');
       } catch (error) {
         console.error('Error deleting product:', error);
-        alert('상품 삭제 중 오류가 발생했습니다.');
+        showToast('상품 삭제 중 오류가 발생했습니다.');
       }
     }
   };
@@ -613,9 +829,10 @@ export function Dashboard() {
         await firebaseApi.deleteCoffee(id);
       }
       setCoffees(prev => prev.map(c => c.id === id ? { ...c, active } : c));
+      showToast(`커피가 ${active ? '활성화' : '비활성화'}되었습니다.`);
     } catch (error) {
       console.error('Error toggling coffee status:', error);
-      alert('커피 상태 변경 중 오류가 발생했습니다.');
+      showToast('커피 상태 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -624,10 +841,11 @@ export function Dashboard() {
       const updatedProduct = await firebaseApi.toggleProductActive(id, active);
       if (updatedProduct) {
         setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
+        showToast(`상품이 ${active ? '활성화' : '비활성화'}되었습니다.`);
       }
     } catch (error) {
       console.error('Error toggling product status:', error);
-      alert('상품 상태 변경 중 오류가 발생했습니다.');
+      showToast('상품 상태 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -650,11 +868,11 @@ export function Dashboard() {
 
   const handleSave = async () => {
     if (!formData.titleKo.trim()) {
-      alert('커피명(한글)을 입력해주세요.');
+      showToast('커피명(한글)을 입력해주세요.');
       return;
     }
     if (!formData.titleEn.trim()) {
-      alert('커피명(영문)을 입력해주세요.');
+      showToast('커피명(영문)을 입력해주세요.');
       return;
     }
 
@@ -663,29 +881,31 @@ export function Dashboard() {
         const updatedCoffee = await firebaseApi.updateCoffee(editingCoffee.id, formData);
         if (updatedCoffee) {
           setCoffees(prev => prev.map(c => c.id === editingCoffee.id ? updatedCoffee : c));
+          showToast('커피가 수정되었습니다.');
         }
       } else {
         const newCoffee = await firebaseApi.createCoffee(formData);
         setCoffees(prev => [...prev, newCoffee]);
+        showToast('새 커피가 추가되었습니다.');
       }
       resetForm();
     } catch (error) {
       console.error('Error saving coffee:', error);
-      alert('커피 저장 중 오류가 발생했습니다.');
+      showToast('커피 저장 중 오류가 발생했습니다.');
     }
   };
 
   const handleProductSave = async () => {
     if (!productFormData.titleKo.trim()) {
-      alert('상품명(한글)을 입력해주세요.');
+      showToast('상품명(한글)을 입력해주세요.');
       return;
     }
     if (!productFormData.category.trim()) {
-      alert('카테고리를 입력해주세요.');
+      showToast('카테고리를 입력해주세요.');
       return;
     }
     if (productFormData.price <= 0) {
-      alert('올바른 가격을 입력해주세요.');
+      showToast('올바른 가격을 입력해주세요.');
       return;
     }
 
@@ -694,22 +914,24 @@ export function Dashboard() {
         const updatedProduct = await firebaseApi.updateProduct(editingProduct.id, productFormData);
         if (updatedProduct) {
           setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
+          showToast('상품이 수정되었습니다.');
         }
       } else {
         const newProduct = await firebaseApi.createProduct(productFormData);
         setProducts(prev => [...prev, newProduct]);
+        showToast('새 상품이 추가되었습니다.');
       }
       resetProductForm();
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('상품 저장 중 오류가 발생했습니다.');
+      showToast('상품 저장 중 오류가 발생했습니다.');
     }
   };
 
   // 신규 풍미 노트 등록 함수
   const handleNewFlavorNoteSubmit = async () => {
     if (!newFlavorNoteData.titleKo.trim() || !newFlavorNoteData.titleEn.trim()) {
-      alert('풍미 노트 제목을 입력해주세요.');
+      showToast('풍미 노트 제목을 입력해주세요.');
       return;
     }
 
@@ -725,10 +947,10 @@ export function Dashboard() {
         description: '',
         category: ''
       });
-      alert('새 풍미 노트가 등록되었습니다.');
+      showToast('새 풍미 노트가 등록되었습니다.');
     } catch (error) {
       console.error('Error creating flavor note:', error);
-      alert('풍미 노트 등록 중 오류가 발생했습니다.');
+      showToast('풍미 노트 등록 중 오류가 발생했습니다.');
     }
   };
 
@@ -1069,12 +1291,9 @@ export function Dashboard() {
                     <label className="block text-sm font-medium text-text-primary mb-1">
                       가격
                     </label>
-                    <input
-                      type="number"
+                    <PriceInput
                       value={formData.price}
-                      onChange={(e) => handleInputChange('price', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                      min="0"
+                      onChange={(value) => handleInputChange('price', value)}
                     />
                   </div>
                   <div>
@@ -1145,12 +1364,10 @@ export function Dashboard() {
                   <label className="block text-sm font-medium text-text-primary mb-1">
                     고도
                   </label>
-                  <input
-                    type="text"
+                  <AltitudeInput
                     value={formData.altitude}
-                    onChange={(e) => handleInputChange('altitude', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                    placeholder="예: 1,800m"
+                    onChange={(value) => handleInputChange('altitude', value)}
+                    placeholder="1,800"
                   />
                 </div>
 
@@ -1159,18 +1376,13 @@ export function Dashboard() {
                     풍미 노트
                   </label>
                   <div className="flex gap-2 mb-2">
-                    <select
+                    <InputSelect
                       value={selectedFlavorNote}
-                      onChange={(e) => setSelectedFlavorNote(e.target.value)}
-                      className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                    >
-                      <option value="">풍미 노트를 선택하세요</option>
-                      {flavorNotes.map((note) => (
-                        <option key={note.id} value={note.titleKo}>
-                          {note.emoji} {note.titleKo} ({note.titleEn})
-                        </option>
-                      ))}
-                    </select>
+                      onChange={setSelectedFlavorNote}
+                      options={flavorNoteOptions}
+                      placeholder="풍미 노트를 검색하거나 선택하세요"
+                      onAddNew={() => setShowFlavorNoteForm(true)}
+                    />
                     <button
                       onClick={addFlavorNote}
                       type="button"
@@ -1178,14 +1390,6 @@ export function Dashboard() {
                       disabled={!selectedFlavorNote}
                     >
                       추가
-                    </button>
-                    <button
-                      onClick={() => setShowFlavorNoteForm(true)}
-                      type="button"
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                      title="새 풍미 노트 등록"
-                    >
-                      신규
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -1228,16 +1432,13 @@ export function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="active"
-                    checked={formData.active}
-                    onChange={(e) => handleInputChange('active', e.target.checked)}
-                    className="w-4 h-4 text-text-primary rounded"
-                  />
-                  <label htmlFor="active" className="text-sm font-medium text-text-primary">
+                  <label className="text-sm font-medium text-text-primary">
                     커피 활성화
                   </label>
+                  <ToggleButton
+                    checked={formData.active}
+                    onChange={(checked) => handleInputChange('active', checked)}
+                  />
                 </div>
               </div>
             </div>
@@ -1300,13 +1501,9 @@ export function Dashboard() {
                     <label className="block text-sm font-medium text-text-primary mb-1">
                       가격 *
                     </label>
-                    <input
-                      type="number"
+                    <PriceInput
                       value={productFormData.price}
-                      onChange={(e) => handleProductInputChange('price', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                      placeholder="원"
-                      min="0"
+                      onChange={(value) => handleProductInputChange('price', value)}
                     />
                   </div>
                 </div>
@@ -1406,16 +1603,13 @@ export function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="productActive"
-                    checked={productFormData.active}
-                    onChange={(e) => handleProductInputChange('active', e.target.checked)}
-                    className="w-4 h-4 text-text-primary rounded"
-                  />
-                  <label htmlFor="productActive" className="text-sm font-medium text-text-primary">
+                  <label className="text-sm font-medium text-text-primary">
                     상품 활성화
                   </label>
+                  <ToggleButton
+                    checked={productFormData.active}
+                    onChange={(checked) => handleProductInputChange('active', checked)}
+                  />
                 </div>
               </div>
             </div>
