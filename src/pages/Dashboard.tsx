@@ -280,7 +280,7 @@ function AltitudeInput({
 function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?coffee=${coffee.id}`;
-  const { toast, showToast, hideToast } = useToast();
+  const { showToast } = useToast();
 
   const copyHomeUrl = async () => {
     try {
@@ -303,101 +303,117 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
   };
 
   return (
-    <>
-      <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
-        coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
-      }`}>
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className={`font-bold text-lg truncate ${
-              coffee.active ? 'text-text-primary' : 'text-gray-400'
-            }`}>
-              {coffee.titleKo}
-            </h3>
-            <p className={`text-sm truncate ${
-              coffee.active ? 'text-text-muted' : 'text-gray-400'
-            }`}>
-              {coffee.titleEn}
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-1 ml-4">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              coffee.active 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}>
-              {coffee.active ? '활성' : '비활성'}
-            </span>
-          </div>
+    <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
+      coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
+    }`}>
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-bold text-lg truncate ${
+            coffee.active ? 'text-text-primary' : 'text-gray-400'
+          }`}>
+            {coffee.titleKo}
+          </h3>
+          <p className={`text-sm truncate ${
+            coffee.active ? 'text-text-muted' : 'text-gray-400'
+          }`}>
+            {coffee.titleEn}
+          </p>
         </div>
-
-        <div className="flex flex-wrap gap-1 mb-3">
-          {coffee.flavorNotes.slice(0, 2).map((note, index) => (
-            <Badge key={index} className="text-xs">
-              {note}
-            </Badge>
-          ))}
-          {coffee.flavorNotes.length > 2 && (
-            <span className="text-xs text-text-muted">+{coffee.flavorNotes.length - 2}</span>
-          )}
-        </div>
-
-        {/* 날짜 정보 - 한 줄 양끝 정렬 */}
-        <div className="mb-3 text-xs text-gray-500 flex justify-between items-center">
-          <div>생성: {formatDate(coffee.createdAt)}</div>
-          <div>수정: {formatDate(coffee.updatedAt)}</div>
-        </div>
-
-        {/* 간단한 아이콘 버튼들 */}
-        <div className="flex gap-2">
-          <button
-            onClick={copyHomeUrl}
-            className="flex items-center justify-center w-10 h-10 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
-            title="홈 URL 복사"
-          >
-            <Icons.Link className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onEdit(coffee.id)}
-            className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
-            title="편집"
-          >
-            <Icons.Edit className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onToggleActive(coffee.id, !coffee.active)}
-            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
-              coffee.active
-                ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                : 'bg-green-100 text-green-600 hover:bg-green-200'
-            }`}
-            title={coffee.active ? '비활성화' : '활성화'}
-          >
-            <Icons.Toggle className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDelete(coffee.id)}
-            className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
-            title="삭제"
-          >
-            <Icons.Delete className="w-4 h-4" />
-          </button>
+        <div className="flex flex-col items-end gap-1 ml-4">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            coffee.active 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {coffee.active ? '활성' : '비활성'}
+          </span>
+          <span className="text-sm font-medium text-text-primary">
+            ₩{(coffee.price || 0).toLocaleString()}
+          </span>
         </div>
       </div>
-      
-      <Toast 
-        message={toast.message}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
-      />
-    </>
+
+      {/* 풍미 노트 배지 */}
+      {coffee.flavorNotes && coffee.flavorNotes.length > 0 && (
+        <div className="mb-3">
+          <div className="flex flex-wrap gap-1">
+            {coffee.flavorNotes.slice(0, 3).map((note, index) => (
+              <Badge 
+                key={index} 
+                className={`text-xs ${
+                  coffee.active 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-gray-100 text-gray-400'
+                }`}
+              >
+                {note}
+              </Badge>
+            ))}
+            {coffee.flavorNotes.length > 3 && (
+              <Badge className="text-xs bg-gray-100 text-gray-600">
+                +{coffee.flavorNotes.length - 3}
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 원산지 정보 */}
+      {coffee.country && (
+        <div className="mb-2 text-xs text-gray-600">
+          📍 {coffee.country}{coffee.region && `, ${coffee.region}`}
+        </div>
+      )}
+
+      {/* 날짜 정보 추가 */}
+      <div className="mb-3 text-xs text-gray-500 flex justify-between items-center">
+        <div>생성: {formatDate(coffee.createdAt)}</div>
+        <div>수정: {formatDate(coffee.updatedAt)}</div>
+      </div>
+
+      {/* 간단한 아이콘 버튼들 */}
+      <div className="flex gap-2">
+        <button
+          onClick={copyHomeUrl}
+          className="flex items-center justify-center w-10 h-10 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
+          title="홈 URL 복사"
+        >
+          <Icons.Link className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onEdit(coffee.id)}
+          className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
+          title="편집"
+        >
+          <Icons.Edit className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onToggleActive(coffee.id, !coffee.active)}
+          className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
+            coffee.active
+              ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+              : 'bg-green-100 text-green-600 hover:bg-green-200'
+          }`}
+          title={coffee.active ? '비활성화' : '활성화'}
+        >
+          <Icons.Toggle className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onDelete(coffee.id)}
+          className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
+          title="삭제"
+        >
+          <Icons.Delete className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
   );
 }
 
 function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?product=${product.id}`;
-  const { toast, showToast, hideToast } = useToast();
+  const { showToast } = useToast();
 
   const copyHomeUrl = async () => {
     try {
@@ -420,98 +436,90 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
   };
 
   return (
-    <>
-      <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
-        product.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
-      }`}>
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className={`font-bold text-lg truncate ${
-              product.active ? 'text-text-primary' : 'text-gray-400'
-            }`}>
-              {product.titleKo}
-            </h3>
-            {product.titleEn && (
-              <p className={`text-sm truncate ${
-                product.active ? 'text-text-muted' : 'text-gray-400'
-              }`}>
-                {product.titleEn}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col items-end gap-1 ml-4">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              product.active 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}>
-              {product.active ? '활성' : '비활성'}
-            </span>
-            <span className="text-sm font-medium text-text-primary">
-              ₩{product.price.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-            product.active 
-              ? 'bg-blue-100 text-blue-800' 
-              : 'bg-gray-100 text-gray-400'
+    <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
+      product.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
+    }`}>
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-bold text-lg truncate ${
+            product.active ? 'text-text-primary' : 'text-gray-400'
           }`}>
-            {product.category}
+            {product.titleKo}
+          </h3>
+          {product.titleEn && (
+            <p className={`text-sm truncate ${
+              product.active ? 'text-text-muted' : 'text-gray-400'
+            }`}>
+              {product.titleEn}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col items-end gap-1 ml-4">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            product.active 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {product.active ? '활성' : '비활성'}
+          </span>
+          <span className="text-sm font-medium text-text-primary">
+            ₩{product.price.toLocaleString()}
           </span>
         </div>
-
-        {/* 날짜 정보 추가 */}
-        <div className="mb-3 text-xs text-gray-500 flex justify-between items-center">
-          <div>생성: {formatDate(product.createdAt)}</div>
-          <div>수정: {formatDate(product.updatedAt)}</div>
-        </div>
-
-        {/* 간단한 아이콘 버튼들 */}
-        <div className="flex gap-2">
-          <button
-            onClick={copyHomeUrl}
-            className="flex items-center justify-center w-10 h-10 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
-            title="홈 URL 복사"
-          >
-            <Icons.Link className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onEdit(product.id)}
-            className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
-            title="편집"
-          >
-            <Icons.Edit className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onToggleActive(product.id, !product.active)}
-            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
-              product.active
-                ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                : 'bg-green-100 text-green-600 hover:bg-green-200'
-            }`}
-            title={product.active ? '비활성화' : '활성화'}
-          >
-            <Icons.Toggle className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDelete(product.id)}
-            className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
-            title="삭제"
-          >
-            <Icons.Delete className="w-4 h-4" />
-          </button>
-        </div>
       </div>
-      
-      <Toast 
-        message={toast.message}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
-      />
-    </>
+
+      <div className="mb-3">
+        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+          product.active 
+            ? 'bg-blue-100 text-blue-800' 
+            : 'bg-gray-100 text-gray-400'
+        }`}>
+          {product.category}
+        </span>
+      </div>
+
+      {/* 날짜 정보 추가 */}
+      <div className="mb-3 text-xs text-gray-500 flex justify-between items-center">
+        <div>생성: {formatDate(product.createdAt)}</div>
+        <div>수정: {formatDate(product.updatedAt)}</div>
+      </div>
+
+      {/* 간단한 아이콘 버튼들 */}
+      <div className="flex gap-2">
+        <button
+          onClick={copyHomeUrl}
+          className="flex items-center justify-center w-10 h-10 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
+          title="홈 URL 복사"
+        >
+          <Icons.Link className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onEdit(product.id)}
+          className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors touch-manipulation"
+          title="편집"
+        >
+          <Icons.Edit className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onToggleActive(product.id, !product.active)}
+          className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
+            product.active
+              ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+              : 'bg-green-100 text-green-600 hover:bg-green-200'
+          }`}
+          title={product.active ? '비활성화' : '활성화'}
+        >
+          <Icons.Toggle className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onDelete(product.id)}
+          className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
+          title="삭제"
+        >
+          <Icons.Delete className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -1739,6 +1747,13 @@ export function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Toast 컴포넌트 */}
+      <Toast 
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 } 
