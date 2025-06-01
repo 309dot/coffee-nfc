@@ -295,16 +295,9 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testD
     }
   };
 
-  // 배지 색상 배열
-  const badgeColors = [
-    'bg-blue-50 text-blue-700',
-    'bg-purple-50 text-purple-700',
-    'bg-green-50 text-green-700',
-    'bg-yellow-50 text-yellow-700',
-    'bg-pink-50 text-pink-700',
-    'bg-indigo-50 text-indigo-700',
-    'bg-red-50 text-red-700',
-    'bg-orange-50 text-orange-700'
+  // 배지 색상 배열 (Figma 디자인에 맞춘 variants)
+  const badgeVariants: Array<'blue' | 'green' | 'orange' | 'red' | 'purple' | 'yellow' | 'pink' | 'indigo'> = [
+    'blue', 'green', 'orange', 'red', 'purple', 'yellow', 'pink', 'indigo'
   ];
 
   // 풍미노트 이름으로 실제 풍미노트 데이터 찾기
@@ -352,17 +345,14 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testD
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
             {coffee.flavorNotes.slice(0, 3).map((note, index) => (
-              <span
+              <Badge
                 key={index}
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                  coffee.active 
-                    ? badgeColors[index % badgeColors.length]
-                    : 'bg-gray-100 text-gray-400'
-                }`}
+                variant={coffee.active ? badgeVariants[index % badgeVariants.length] : undefined}
+                className="flex items-center gap-1"
               >
                 <span className="text-xs">{getFlavorNoteEmoji(note)}</span>
                 {note}
-              </span>
+              </Badge>
             ))}
             {coffee.flavorNotes.length > 3 && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
