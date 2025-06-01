@@ -141,7 +141,7 @@ export function FlavorNoteModal({ isOpen, onClose, flavorNoteName }: FlavorNoteM
           </div>
           
           {/* 헤더 */}
-          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+          <div className="flex justify-between items-center px-6 py-4">
             <h2 className="text-lg font-semibold text-gray-900">풍미 노트</h2>
             <button
               onClick={handleClose}

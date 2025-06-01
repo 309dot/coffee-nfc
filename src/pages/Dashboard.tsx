@@ -294,6 +294,18 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testD
     }
   };
 
+  // 배지 색상 배열
+  const badgeColors = [
+    'bg-blue-50 text-blue-700',
+    'bg-purple-50 text-purple-700',
+    'bg-green-50 text-green-700',
+    'bg-yellow-50 text-yellow-700',
+    'bg-pink-50 text-pink-700',
+    'bg-indigo-50 text-indigo-700',
+    'bg-red-50 text-red-700',
+    'bg-orange-50 text-orange-700'
+  ];
+
   return (
     <div className={`border rounded-2xl p-6 transition-all duration-200 hover:shadow-lg relative ${
       coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
@@ -314,11 +326,18 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testD
 
       {/* 제목 */}
       <div className="pr-20 mb-4">
-        <h3 className={`text-xl font-bold mb-3 ${
+        <h3 className={`text-xl font-bold mb-2 ${
           coffee.active ? 'text-gray-900' : 'text-gray-400'
         }`}>
           {coffee.titleKo}
         </h3>
+        {coffee.titleEn && (
+          <p className={`text-sm mb-3 ${
+            coffee.active ? 'text-gray-600' : 'text-gray-400'
+          }`}>
+            {coffee.titleEn}
+          </p>
+        )}
       </div>
 
       {/* 풍미 노트 배지 */}
@@ -328,12 +347,13 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testD
             {coffee.flavorNotes.slice(0, 3).map((note, index) => (
               <span
                 key={index}
-                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
                   coffee.active 
-                    ? 'bg-blue-50 text-blue-700' 
+                    ? badgeColors[index % badgeColors.length]
                     : 'bg-gray-100 text-gray-400'
                 }`}
               >
+                <span className="text-xs">☕</span>
                 {note}
               </span>
             ))}
@@ -420,18 +440,19 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive, showToast }: P
 
       {/* 제목과 가격 */}
       <div className="pr-20 mb-4">
+        <h3 className={`text-xl font-bold mb-2 ${
+          product.active ? 'text-gray-900' : 'text-gray-400'
+        }`}>
+          {product.titleKo}
+        </h3>
+        
         {/* 카테고리 */}
-        <div className="mb-2">
+        <div className="mb-3">
           <span className="text-sm font-medium text-gray-600">
             {product.category}
           </span>
         </div>
         
-        <h3 className={`text-xl font-bold mb-3 ${
-          product.active ? 'text-gray-900' : 'text-gray-400'
-        }`}>
-          {product.titleKo}
-        </h3>
         <div className="text-lg font-semibold text-gray-900">
           ₩{product.price.toLocaleString()}
         </div>
