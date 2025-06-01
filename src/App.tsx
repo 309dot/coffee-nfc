@@ -5,7 +5,7 @@ import { Home } from './pages/Home';
 import { Detail } from './pages/Detail';
 import { Shop } from './pages/Shop';
 import { Dashboard } from './pages/Dashboard';
-import { InstallPrompt } from './components/ui/InstallPrompt';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import { initializeData } from './services/firebaseApi';
 
 type Tab = 'coffee' | 'details' | 'shop';
@@ -13,7 +13,6 @@ type Tab = 'coffee' | 'details' | 'shop';
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('coffee');
   const [searchParams] = useSearchParams();
-  const [showInstallPrompt, setShowInstallPrompt] = useState(true);
   const page = searchParams.get('page');
   const coffeeId = searchParams.get('coffee');
 
@@ -57,9 +56,7 @@ function App() {
     return (
       <>
         <Dashboard />
-        {showInstallPrompt && (
-          <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
-        )}
+        <PWAInstallPrompt />
       </>
     );
   }
@@ -70,9 +67,7 @@ function App() {
     return (
       <>
         <Dashboard />
-        {showInstallPrompt && (
-          <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
-        )}
+        <PWAInstallPrompt />
       </>
     );
   }
@@ -118,9 +113,7 @@ function App() {
       <Layout currentPage={activeTab} onPageChange={handleTabChange}>
         {renderPage()}
       </Layout>
-      {showInstallPrompt && (
-        <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
-      )}
+      <PWAInstallPrompt />
     </>
   );
 }

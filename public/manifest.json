@@ -2,34 +2,46 @@
   "name": "M1CT Coffee Coaster",
   "short_name": "M1CT Coffee",
   "description": "M1CT의 스페셜티 커피 정보와 맛 노트를 확인해보세요",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
-  "orientation": "portrait",
-  "categories": ["food", "lifestyle"],
+  "theme_color": "#8B5A2B",
+  "orientation": "portrait-primary",
+  "categories": ["food", "lifestyle", "productivity"],
   "lang": "ko",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/favicon.svg",
-      "sizes": "32x32",
-      "type": "image/svg+xml"
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "/apple-touch-icon-180x180.svg",
-      "sizes": "180x180",
-      "type": "image/svg+xml"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     },
     {
-      "src": "/icon-192x192.svg",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icon-512x512.svg",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "screenshots": [
@@ -39,6 +51,22 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "M1CT Coffee 모바일 화면"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "커피 정보",
+      "short_name": "커피",
+      "description": "현재 커피 정보 보기",
+      "url": "/?source=pwa&shortcut=coffee",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "관리 대시보드",
+      "short_name": "관리",
+      "description": "커피 관리 대시보드",
+      "url": "/dashboard?source=pwa&shortcut=dashboard",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 } 
