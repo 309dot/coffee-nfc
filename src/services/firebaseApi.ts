@@ -97,32 +97,110 @@ export const createCoffee = async (data: Omit<CoffeeApiData, 'id' | 'createdAt' 
 // 커피 업데이트
 export const updateCoffee = async (id: string, data: Partial<Omit<CoffeeApiData, 'id' | 'createdAt'>>): Promise<CoffeeApiData | null> => {
   try {
+    console.log('📝 커피 업데이트 시작:', id, data);
+    
     const docRef = doc(db, COFFEES_COLLECTION, id);
+    
+    // 업데이트 전 문서 존재 확인
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      console.log('⚠️ 업데이트할 문서가 존재하지 않음:', id);
+      throw new Error('업데이트할 커피가 존재하지 않습니다.');
+    }
+    
+    console.log('📄 업데이트 전 문서 데이터:', docSnap.data());
+    
     const updateData = {
       ...data,
       updatedAt: new Date().toISOString()
     };
     
     await updateDoc(docRef, updateData);
+    console.log('✅ 업데이트 완료:', id);
     
     // 업데이트된 데이터 반환
     const updatedDoc = await getDoc(docRef);
     if (updatedDoc.exists()) {
-      return { id: updatedDoc.id, ...updatedDoc.data() } as CoffeeApiData;
+      const result = { id: updatedDoc.id, ...updatedDoc.data() } as CoffeeApiData;
+      console.log('📄 업데이트된 문서 데이터:', result);
+      return result;
     }
     return null;
   } catch (error) {
-    console.error('Error updating coffee:', error);
-    return null;
+    console.error('❌ 커피 업데이트 중 오류:', error);
+    
+    // 권한 오류인지 확인
+    if (error instanceof Error && error.message.includes('permission')) {
+      throw new Error('수정 권한이 없습니다. Firebase 규칙을 확인하세요.');
+    }
+    
+    throw error;
   }
 };
 
 // 커피 삭제
 export const deleteCoffee = async (id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, COFFEES_COLLECTION, id));
+    console.log('🗑️ 커피 삭제 시작:', id);
+    
+    // 삭제 전 문서 존재 확인
+    const docRef = doc(db, COFFEES_COLLECTION, id);
+    const docSnap = await getDoc(docRef);
+    
+    if (!docSnap.exists()) {
+      console.log('⚠️ 삭제할 문서가 존재하지 않음:', id);
+      throw new Error('삭제할 커피가 존재하지 않습니다.');
+    }
+    
+    console.log('📄 삭제 전 문서 데이터:', docSnap.data());
+    
+    // 실제 삭제 실행
+    await deleteDoc(docRef);
+    console.log('✅ 삭제 완료:', id);
+    
+    // 삭제 후 확인 (재시도 로직)
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, 500)); // 0.5초 대기
+      const checkDoc = await getDoc(docRef);
+      
+      if (!checkDoc.exists()) {
+        console.log('✅ 삭제 확인 완료:', id);
+        return;
+      }
+      
+      retryCount++;
+      console.log(`🔄 삭제 재시도 ${retryCount}/${maxRetries}:`, id);
+      
+      if (retryCount < maxRetries) {
+        try {
+          await deleteDoc(docRef);
+        } catch (retryError) {
+          console.error('재시도 중 오류:', retryError);
+        }
+      }
+    }
+    
+    if (retryCount === maxRetries) {
+      console.error('❌ 삭제 실패 - 최대 재시도 초과:', id);
+      throw new Error('삭제에 실패했습니다. 관리자에게 문의하세요.');
+    }
+    
   } catch (error) {
-    console.error('Error deleting coffee:', error);
+    console.error('❌ 커피 삭제 중 오류:', error);
+    
+    // 권한 오류인지 확인
+    if (error instanceof Error && error.message.includes('permission')) {
+      throw new Error('삭제 권한이 없습니다. Firebase 규칙을 확인하세요.');
+    }
+    
+    // 네트워크 오류인지 확인
+    if (error instanceof Error && error.message.includes('network')) {
+      throw new Error('네트워크 오류가 발생했습니다. 연결을 확인하세요.');
+    }
+    
     throw error;
   }
 };

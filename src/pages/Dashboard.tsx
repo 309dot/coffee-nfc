@@ -14,6 +14,7 @@ interface CoffeeCardProps {
   onDelete: (id: string) => void;
   onToggleActive: (id: string, active: boolean) => void;
   showToast: (message: string) => void;
+  testDelete?: (id: string) => void;
 }
 
 interface ProductCardProps {
@@ -279,7 +280,7 @@ function AltitudeInput({
   );
 }
 
-function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast }: CoffeeCardProps) {
+function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testDelete }: CoffeeCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?coffee=${coffee.id}`;
 
@@ -368,6 +369,18 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast }: Cof
         >
           <Icons.Delete className="w-4 h-4" />
         </button>
+        {import.meta.env.DEV && testDelete && (
+          <button
+            onClick={() => {
+              console.log('테스트 삭제 시작 - 커피 ID:', coffee.id);
+              testDelete(coffee.id);
+            }}
+            className="flex items-center justify-center w-10 h-10 bg-yellow-50 text-yellow-600 rounded-xl hover:bg-yellow-100 transition-colors"
+            title="테스트 삭제"
+          >
+            🔧
+          </button>
+        )}
       </div>
     </div>
   );
@@ -940,6 +953,62 @@ export function Dashboard() {
     }
   };
 
+  // 데이터 디버깅 함수들 추가
+  const debugData = () => {
+    console.log('=== 현재 커피 데이터 ===');
+    console.log('총 커피 수:', coffees.length);
+    coffees.forEach((coffee, index) => {
+      console.log(`${index + 1}. ID: ${coffee.id}, 제목: ${coffee.titleKo}, 생성일: ${coffee.createdAt}, 활성화: ${coffee.active}`);
+    });
+    showToast('콘솔에서 데이터를 확인하세요.');
+  };
+
+  const forceRefreshData = async () => {
+    try {
+      // Firebase에서 직접 모든 데이터를 다시 가져오기
+      const freshCoffees = await firebaseApi.getAllCoffees();
+      setCoffees(freshCoffees);
+      showToast('데이터를 강제로 새로고침했습니다.');
+      console.log('=== 새로고침된 데이터 ===', freshCoffees);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      showToast('데이터 새로고침 중 오류가 발생했습니다.');
+    }
+  };
+
+  const testDelete = async (coffeeId: string) => {
+    try {
+      console.log('=== 삭제 테스트 시작 ===');
+      console.log('삭제할 커피 ID:', coffeeId);
+      
+      // 삭제 전 상태 확인
+      const beforeCoffee = await firebaseApi.getCoffeeById(coffeeId);
+      console.log('삭제 전 데이터:', beforeCoffee);
+      
+      // 삭제 실행
+      await firebaseApi.deleteCoffee(coffeeId);
+      console.log('삭제 API 호출 완료');
+      
+      // 삭제 후 상태 확인
+      setTimeout(async () => {
+        const afterCoffee = await firebaseApi.getCoffeeById(coffeeId);
+        console.log('삭제 후 데이터:', afterCoffee);
+        
+        if (afterCoffee === null) {
+          console.log('✅ 삭제 성공');
+          showToast('삭제가 성공적으로 완료되었습니다.');
+        } else {
+          console.log('❌ 삭제 실패 - 데이터가 여전히 존재');
+          showToast('삭제가 실패했습니다.');
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('삭제 테스트 중 오류:', error);
+      showToast(`삭제 테스트 오류: ${error}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-bg-primary p-4 sm:p-6 lg:p-8">
@@ -965,7 +1034,7 @@ export function Dashboard() {
           
           {/* 개발 모드 도구 */}
           {import.meta.env.DEV && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={async () => {
                   const success = await addSampleCoffees();
@@ -975,15 +1044,27 @@ export function Dashboard() {
                     showToast('샘플 커피 추가 중 오류가 발생했습니다.');
                   }
                 }}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs"
               >
-                샘플 커피 추가
+                샘플 추가
               </button>
               <button
                 onClick={handleDeleteAll}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs"
               >
                 전체 삭제
+              </button>
+              <button
+                onClick={debugData}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs"
+              >
+                데이터 확인
+              </button>
+              <button
+                onClick={forceRefreshData}
+                className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs"
+              >
+                강제 새로고침
               </button>
             </div>
           )}
@@ -1231,6 +1312,7 @@ export function Dashboard() {
                       onDelete={handleDelete}
                       onToggleActive={handleToggleActive}
                       showToast={showToast}
+                      testDelete={testDelete}
                     />
                   ))}
                   {activeTab === 'products' && filteredAndSortedProducts.map((product) => (
