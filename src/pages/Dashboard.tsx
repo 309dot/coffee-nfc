@@ -294,16 +294,6 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
     }
   };
 
-  const formatDate = (dateString: string | Date | undefined) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
-  };
-
   return (
     <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
       coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
@@ -420,16 +410,6 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
       console.error('Failed to copy:', error);
       showToast('복사에 실패했습니다.');
     }
-  };
-
-  const formatDate = (dateString: string | Date | undefined) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
   };
 
   return (
