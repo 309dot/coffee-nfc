@@ -3,8 +3,8 @@ import { Badge } from '../components/ui/Badge';
 import { Toast, useToast } from '../components/ui/Toast';
 import { FlavorNoteManager } from '../components/FlavorNoteManager';
 import type { CoffeeApiData } from '../services/api';
-import { firebaseApi } from '../services/firebaseApi';
-import type { Product } from '../types';
+import * as firebaseApi from '../services/firebaseApi';
+import type { Product, FlavorNote } from '../types';
 
 interface CoffeeCardProps {
   coffee: CoffeeApiData;
@@ -315,13 +315,22 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
 export function Dashboard() {
   const [coffees, setCoffees] = useState<CoffeeApiData[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [flavorNotes, setFlavorNotes] = useState<FlavorNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'coffee' | 'products' | 'flavorNotes'>('coffee');
   const [showForm, setShowForm] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingCoffee, setEditingCoffee] = useState<CoffeeApiData | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [flavorNoteInput, setFlavorNoteInput] = useState('');
+  const [selectedFlavorNote, setSelectedFlavorNote] = useState('');
+  const [showFlavorNoteForm, setShowFlavorNoteForm] = useState(false);
+  const [newFlavorNoteData, setNewFlavorNoteData] = useState({
+    titleKo: '',
+    titleEn: '',
+    emoji: '☕',
+    description: '',
+    category: ''
+  });
 
   // 새로운 필터링 및 정렬 상태
   const [coffeeFilter, setCoffeeFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -369,9 +378,14 @@ export function Dashboard() {
       setProducts(updatedProducts);
     });
 
+    const unsubscribeFlavorNotes = firebaseApi.subscribeToFlavorNotes((updatedFlavorNotes) => {
+      setFlavorNotes(updatedFlavorNotes);
+    });
+
     return () => {
       unsubscribeCoffees();
       unsubscribeProducts();
+      unsubscribeFlavorNotes();
     };
   }, []);
 
@@ -508,7 +522,7 @@ export function Dashboard() {
       price: 0,
       active: true
     });
-    setFlavorNoteInput('');
+    setSelectedFlavorNote('');
     setEditingCoffee(null);
     setShowForm(false);
   };
@@ -618,12 +632,12 @@ export function Dashboard() {
   };
 
   const addFlavorNote = () => {
-    if (flavorNoteInput.trim() && !formData.flavorNotes.includes(flavorNoteInput.trim())) {
+    if (selectedFlavorNote && !formData.flavorNotes.includes(selectedFlavorNote)) {
       setFormData(prev => ({
         ...prev,
-        flavorNotes: [...prev.flavorNotes, flavorNoteInput.trim()]
+        flavorNotes: [...prev.flavorNotes, selectedFlavorNote]
       }));
-      setFlavorNoteInput('');
+      setSelectedFlavorNote('');
     }
   };
 
@@ -690,6 +704,36 @@ export function Dashboard() {
       console.error('Error saving product:', error);
       alert('상품 저장 중 오류가 발생했습니다.');
     }
+  };
+
+  // 신규 풍미 노트 등록 함수
+  const handleNewFlavorNoteSubmit = async () => {
+    if (!newFlavorNoteData.titleKo.trim() || !newFlavorNoteData.titleEn.trim()) {
+      alert('풍미 노트 제목을 입력해주세요.');
+      return;
+    }
+
+    try {
+      const newFlavorNote = await firebaseApi.createFlavorNote(newFlavorNoteData);
+      // 새로 생성된 풍미 노트를 선택된 상태로 설정
+      setSelectedFlavorNote(newFlavorNote.titleKo);
+      setShowFlavorNoteForm(false);
+      setNewFlavorNoteData({
+        titleKo: '',
+        titleEn: '',
+        emoji: '☕',
+        description: '',
+        category: ''
+      });
+      alert('새 풍미 노트가 등록되었습니다.');
+    } catch (error) {
+      console.error('Error creating flavor note:', error);
+      alert('풍미 노트 등록 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleNewFlavorNoteInputChange = (field: string, value: string) => {
+    setNewFlavorNoteData(prev => ({ ...prev, [field]: value }));
   };
 
   if (loading) {
@@ -1115,20 +1159,33 @@ export function Dashboard() {
                     풍미 노트
                   </label>
                   <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={flavorNoteInput}
-                      onChange={(e) => setFlavorNoteInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addFlavorNote()}
+                    <select
+                      value={selectedFlavorNote}
+                      onChange={(e) => setSelectedFlavorNote(e.target.value)}
                       className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
-                      placeholder="풍미 노트 입력 후 추가 버튼 클릭"
-                    />
+                    >
+                      <option value="">풍미 노트를 선택하세요</option>
+                      {flavorNotes.map((note) => (
+                        <option key={note.id} value={note.titleKo}>
+                          {note.emoji} {note.titleKo} ({note.titleEn})
+                        </option>
+                      ))}
+                    </select>
                     <button
                       onClick={addFlavorNote}
                       type="button"
                       className="px-4 py-2 bg-text-primary text-white rounded-lg hover:bg-text-primary/90"
+                      disabled={!selectedFlavorNote}
                     >
                       추가
+                    </button>
+                    <button
+                      onClick={() => setShowFlavorNoteForm(true)}
+                      type="button"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      title="새 풍미 노트 등록"
+                    >
+                      신규
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -1377,6 +1434,111 @@ export function Dashboard() {
                 >
                   <Icons.Save className="w-4 h-4" />
                   {editingProduct ? '수정' : '저장'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Flavor Note Form Modal */}
+      {showFlavorNoteForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-lg">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-text-primary">새 풍미 노트 등록</h2>
+                <button
+                  onClick={() => setShowFlavorNoteForm(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <Icons.Close className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      제목(한글) *
+                    </label>
+                    <input
+                      type="text"
+                      value={newFlavorNoteData.titleKo}
+                      onChange={(e) => handleNewFlavorNoteInputChange('titleKo', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      placeholder="예: 레몬 껍질"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      제목(영문) *
+                    </label>
+                    <input
+                      type="text"
+                      value={newFlavorNoteData.titleEn}
+                      onChange={(e) => handleNewFlavorNoteInputChange('titleEn', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      placeholder="예: lemon peel"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      이모지
+                    </label>
+                    <input
+                      type="text"
+                      value={newFlavorNoteData.emoji}
+                      onChange={(e) => handleNewFlavorNoteInputChange('emoji', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      placeholder="🍋"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      카테고리
+                    </label>
+                    <input
+                      type="text"
+                      value={newFlavorNoteData.category}
+                      onChange={(e) => handleNewFlavorNoteInputChange('category', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                      placeholder="과일, 견과류, 플로럴 등"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1">
+                    설명
+                  </label>
+                  <textarea
+                    value={newFlavorNoteData.description}
+                    onChange={(e) => handleNewFlavorNoteInputChange('description', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-text-primary"
+                    placeholder="풍미 노트에 대한 자세한 설명"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowFlavorNoteForm(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleNewFlavorNoteSubmit}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-text-primary text-white rounded-lg hover:bg-text-primary/90 transition-colors"
+                  disabled={!newFlavorNoteData.titleKo.trim() || !newFlavorNoteData.titleEn.trim()}
+                >
+                  <Icons.Save className="w-4 h-4" />
+                  등록
                 </button>
               </div>
             </div>
