@@ -13,6 +13,7 @@ interface CoffeeCardProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleActive: (id: string, active: boolean) => void;
+  showToast: (message: string) => void;
 }
 
 interface ProductCardProps {
@@ -20,6 +21,7 @@ interface ProductCardProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleActive: (id: string, active: boolean) => void;
+  showToast: (message: string) => void;
 }
 
 // SVG 아이콘 컴포넌트들
@@ -277,10 +279,9 @@ function AltitudeInput({
   );
 }
 
-function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProps) {
+function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast }: CoffeeCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?coffee=${coffee.id}`;
-  const { showToast } = useToast();
 
   const copyHomeUrl = async () => {
     try {
@@ -372,10 +373,9 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
   );
 }
 
-function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardProps) {
+function ProductCard({ product, onEdit, onDelete, onToggleActive, showToast }: ProductCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?product=${product.id}`;
-  const { showToast } = useToast();
 
   const copyHomeUrl = async () => {
     try {
@@ -736,7 +736,6 @@ export function Dashboard() {
     if (window.confirm('정말로 이 커피를 삭제하시겠습니까?')) {
       try {
         await firebaseApi.deleteCoffee(id);
-        setCoffees(prev => prev.filter(c => c.id !== id));
         showToast('커피가 삭제되었습니다.');
       } catch (error) {
         console.error('Error deleting coffee:', error);
@@ -749,7 +748,6 @@ export function Dashboard() {
     if (window.confirm('정말로 이 상품을 삭제하시겠습니까?')) {
       try {
         await firebaseApi.deleteProduct(id);
-        setProducts(prev => prev.filter(p => p.id !== id));
         showToast('상품이 삭제되었습니다.');
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -760,12 +758,7 @@ export function Dashboard() {
 
   const handleToggleActive = async (id: string, active: boolean) => {
     try {
-      if (active) {
-        await firebaseApi.updateCoffee(id, { active });
-      } else {
-        await firebaseApi.deleteCoffee(id);
-      }
-      setCoffees(prev => prev.map(c => c.id === id ? { ...c, active } : c));
+      await firebaseApi.updateCoffee(id, { active });
       showToast(`커피가 ${active ? '활성화' : '비활성화'}되었습니다.`);
     } catch (error) {
       console.error('Error toggling coffee status:', error);
@@ -1177,6 +1170,7 @@ export function Dashboard() {
                       onEdit={handleEdit}
                       onDelete={handleDelete}
                       onToggleActive={handleToggleActive}
+                      showToast={showToast}
                     />
                   ))}
                   {activeTab === 'products' && filteredAndSortedProducts.map((product) => (
@@ -1186,6 +1180,7 @@ export function Dashboard() {
                       onEdit={handleProductEdit}
                       onDelete={handleProductDelete}
                       onToggleActive={handleProductToggleActive}
+                      showToast={showToast}
                     />
                   ))}
                 </div>

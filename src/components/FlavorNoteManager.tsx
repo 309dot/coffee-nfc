@@ -141,6 +141,27 @@ export function FlavorNoteManager() {
       return;
     }
 
+    // 중복 체크 (편집 중인 항목은 제외)
+    const duplicateKo = flavorNotes.find(note => 
+      note.titleKo.toLowerCase() === formData.titleKo.toLowerCase() && 
+      (!editingNote || note.id !== editingNote.id)
+    );
+    
+    const duplicateEn = flavorNotes.find(note => 
+      note.titleEn.toLowerCase() === formData.titleEn.toLowerCase() && 
+      (!editingNote || note.id !== editingNote.id)
+    );
+
+    if (duplicateKo) {
+      showToast(`한글 제목 "${formData.titleKo}"가 이미 존재합니다.`);
+      return;
+    }
+
+    if (duplicateEn) {
+      showToast(`영문 제목 "${formData.titleEn}"가 이미 존재합니다.`);
+      return;
+    }
+
     try {
       if (editingNote) {
         await firebaseApi.updateFlavorNote(editingNote.id, formData);
@@ -153,6 +174,54 @@ export function FlavorNoteManager() {
     } catch (error) {
       console.error('Error saving flavor note:', error);
       showToast('저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 중복 항목 정리 함수
+  const cleanupDuplicates = async () => {
+    if (!window.confirm('중복된 풍미노트를 정리하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    try {
+      const titleMap = new Map<string, FlavorNote>();
+      const duplicates: FlavorNote[] = [];
+      
+      // 한글 제목 기준으로 중복 찾기
+      flavorNotes.forEach(note => {
+        const key = note.titleKo.toLowerCase();
+        if (titleMap.has(key)) {
+          // 중복된 경우, 더 최근에 만들어진 것을 유지
+          const existing = titleMap.get(key)!;
+          const existingDate = new Date(existing.createdAt || 0);
+          const currentDate = new Date(note.createdAt || 0);
+          
+          if (currentDate > existingDate) {
+            duplicates.push(existing);
+            titleMap.set(key, note);
+          } else {
+            duplicates.push(note);
+          }
+        } else {
+          titleMap.set(key, note);
+        }
+      });
+
+      // 중복 항목 삭제
+      let deletedCount = 0;
+      for (const duplicate of duplicates) {
+        try {
+          await firebaseApi.deleteFlavorNote(duplicate.id);
+          deletedCount++;
+        } catch (error) {
+          console.error(`Failed to delete duplicate: ${duplicate.titleKo}`, error);
+        }
+      }
+
+      showToast(`${deletedCount}개의 중복 항목이 정리되었습니다.`);
+    } catch (error) {
+      console.error('Error cleaning duplicates:', error);
+      showToast('중복 정리 중 오류가 발생했습니다.');
     }
   };
 
@@ -396,6 +465,13 @@ export function FlavorNoteManager() {
             <p className="text-text-muted text-sm">총 {flavorNotes.length}개의 풍미노트</p>
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={cleanupDuplicates}
+              className="flex items-center justify-center w-10 h-10 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors touch-manipulation"
+              title="중복 항목 정리"
+            >
+              <Icons.Delete className="w-4 h-4" />
+            </button>
             <button
               onClick={() => setShowSync(true)}
               className="flex items-center justify-center w-10 h-10 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors touch-manipulation"
