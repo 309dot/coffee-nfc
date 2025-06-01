@@ -3,17 +3,24 @@ import { Badge } from '../components/ui/Badge';
 import { M1CTLogo, ArrowRightIcon } from '../components/icons';
 import { FlavorNoteModal } from '../components/FlavorNoteModal';
 import { api, type CoffeeApiData } from '../services/api';
+import * as firebaseApi from '../services/firebaseApi';
+import type { FlavorNote } from '../types';
 
 export function Home() {
   const [coffee, setCoffee] = useState<CoffeeApiData | null>(null);
+  const [flavorNotes, setFlavorNotes] = useState<FlavorNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedFlavorNote, setSelectedFlavorNote] = useState<string>('');
 
   useEffect(() => {
-    const loadCoffeeData = async () => {
+    const loadData = async () => {
       setLoading(true);
       try {
+        // 풍미노트 데이터 로드
+        const flavorNotesData = await firebaseApi.getAllFlavorNotes();
+        setFlavorNotes(flavorNotesData);
+
         // URL에서 coffee ID 파라미터 확인
         const urlParams = new URLSearchParams(window.location.search);
         const coffeeId = urlParams.get('coffee');
@@ -38,14 +45,35 @@ export function Home() {
           }
         }
       } catch (error) {
-        console.error('Error loading coffee data:', error);
+        console.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadCoffeeData();
+    loadData();
   }, []);
+
+  // 풍미노트 이름으로 실제 풍미노트 데이터 찾기
+  const getFlavorNoteData = (noteName: string) => {
+    const flavorNote = flavorNotes.find(note => note.titleKo === noteName);
+    return {
+      emoji: flavorNote?.emoji || '☕',
+      name: noteName
+    };
+  };
+
+  // 배지 색상 배열 (대시보드와 동일)
+  const badgeColors = [
+    'bg-blue-50 text-blue-700',
+    'bg-purple-50 text-purple-700',
+    'bg-green-50 text-green-700',
+    'bg-yellow-50 text-yellow-700',
+    'bg-pink-50 text-pink-700',
+    'bg-indigo-50 text-indigo-700',
+    'bg-red-50 text-red-700',
+    'bg-orange-50 text-orange-700'
+  ];
 
   const handleFlavorNoteClick = (flavorNote: string) => {
     setSelectedFlavorNote(flavorNote);
@@ -79,8 +107,8 @@ export function Home() {
   return (
     <>
       <div className="flex flex-col gap-1 min-h-screen">
-        {/* Title Section */}
-        <section className="bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center">
+        {/* Title Section - Sticky with lower z-index */}
+        <section className={`sticky top-0 z-1 bg-white rounded-b-2xl px-6 py-10 flex flex-col gap-2 flex-1 justify-center transition-shadow duration-300`}>
           <div className="mb-auto">
             <h1 className="text-4xl font-bold text-text-primary leading-tight tracking-tight break-keep word-break-keep">
               {coffee.titleKo}
@@ -92,32 +120,46 @@ export function Home() {
           
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mt-2">
-            {coffee.flavorNotes.map((note, index) => (
-              <Badge 
-                key={index} 
-                className="break-keep word-break-keep"
-                onClick={() => handleFlavorNoteClick(note)}
-              >
-                {note}
-              </Badge>
-            ))}
+            {coffee.flavorNotes.map((note, index) => {
+              const flavorData = getFlavorNoteData(note);
+              return (
+                <Badge 
+                  key={index} 
+                  className={`${badgeColors[index % badgeColors.length]} break-keep word-break-keep flex items-center gap-1`}
+                  onClick={() => handleFlavorNoteClick(note)}
+                >
+                  <span className="text-xs">{flavorData.emoji}</span>
+                  {flavorData.name}
+                </Badge>
+              );
+            })}
           </div>
         </section>
 
         {/* Comment Card */}
-        <section className="rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
-          <div className="flex flex-col gap-2.5">
-            <p className="text-sm text-text-muted font-normal mb-2 break-keep word-break-keep">
-              master comment
-            </p>
-            <p className="text-base font-bold text-text-primary break-keep word-break-keep">
-              "{coffee.masterComment}"
-            </p>
+        <section className="relative z-10 rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
+          <div className="flex flex-col gap-2">
+            {/* Avatar */}
+            <div className="w-8 h-8 bg-gray-300 rounded-full overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white font-semibold text-sm">
+                B
+              </div>
+            </div>
+            
+            {/* Text Content */}
+            <div className="flex flex-col items-center justify-center gap-10">
+              <p className="text-sm text-text-muted font-normal break-keep word-break-keep">
+                master comment
+              </p>
+              <p className="text-base font-bold text-text-primary break-keep word-break-keep">
+                "{coffee.masterComment}"
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="rounded-2xl p-6" style={{ backgroundColor: '#FFBF8A' }}>
+        {/* CTA Section - Higher z-index */}
+        <section className="relative z-10 rounded-2xl p-6" style={{ backgroundColor: '#FFBF8A' }}>
           <div className="flex justify-between items-center gap-2">
             {/* Logo */}
             <M1CTLogo className="text-text-primary" />

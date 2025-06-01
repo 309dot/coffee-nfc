@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { M1CTLogo, InstagramIcon, GlobalIcon } from '../icons';
 
 interface HeaderProps {
@@ -6,6 +7,19 @@ interface HeaderProps {
 }
 
 export function Header({ variant: _variant = 'default', className = '' }: HeaderProps) {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // 스크롤 이벤트 리스너
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleInstagramClick = () => {
     window.open('https://www.instagram.com/m1ct.coffee/', '_blank');
   };
@@ -16,10 +30,10 @@ export function Header({ variant: _variant = 'default', className = '' }: Header
 
   // 스타일 변형
   const getContainerClasses = () => {
-    const baseClasses = "fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-2";
+    const baseClasses = "fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-2 transition-shadow duration-300";
     
-    // 모든 variant에서 동일한 스타일 적용 (border 제거)
-    return `${baseClasses} bg-white`;
+    // 스크롤 시 그림자 효과 추가
+    return `${baseClasses} bg-white ${isScrolled ? 'shadow-lg' : ''}`;
   };
 
   const getButtonClasses = () => {

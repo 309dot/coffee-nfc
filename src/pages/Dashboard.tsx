@@ -15,6 +15,7 @@ interface CoffeeCardProps {
   onToggleActive: (id: string, active: boolean) => void;
   showToast: (message: string) => void;
   testDelete?: (id: string) => void;
+  flavorNotes: FlavorNote[]; // 풍미노트 데이터 추가
 }
 
 interface ProductCardProps {
@@ -280,7 +281,7 @@ function AltitudeInput({
   );
 }
 
-function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testDelete }: CoffeeCardProps) {
+function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testDelete, flavorNotes }: CoffeeCardProps) {
   const baseUrl = window.location.origin;
   const homeUrl = `${baseUrl}/?coffee=${coffee.id}`;
 
@@ -305,6 +306,12 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testD
     'bg-red-50 text-red-700',
     'bg-orange-50 text-orange-700'
   ];
+
+  // 풍미노트 이름으로 실제 풍미노트 데이터 찾기
+  const getFlavorNoteEmoji = (noteName: string) => {
+    const flavorNote = flavorNotes.find(note => note.titleKo === noteName);
+    return flavorNote?.emoji || '☕'; // 찾을 수 없으면 기본 이모지
+  };
 
   return (
     <div className={`border rounded-2xl p-6 transition-all duration-200 hover:shadow-lg relative ${
@@ -353,7 +360,7 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive, showToast, testD
                     : 'bg-gray-100 text-gray-400'
                 }`}
               >
-                <span className="text-xs">☕</span>
+                <span className="text-xs">{getFlavorNoteEmoji(note)}</span>
                 {note}
               </span>
             ))}
@@ -1334,6 +1341,7 @@ export function Dashboard() {
                       onToggleActive={handleToggleActive}
                       showToast={showToast}
                       testDelete={testDelete}
+                      flavorNotes={flavorNotes}
                     />
                   ))}
                   {activeTab === 'products' && filteredAndSortedProducts.map((product) => (
