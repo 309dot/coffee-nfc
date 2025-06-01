@@ -257,8 +257,10 @@ function AltitudeInput({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.replace(/[^\d,]/g, ''); // 숫자와 콤마만 허용
-    setDisplayValue(inputValue);
-    onChange(inputValue + 'm');
+    const numericValue = parseInt(inputValue.replace(/,/g, '')) || 0;
+    const formattedValue = numericValue.toLocaleString();
+    setDisplayValue(formattedValue);
+    onChange(formattedValue + 'm');
   };
 
   return (
@@ -306,6 +308,7 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
     <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
       coffee.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
     }`}>
+      {/* 상단 헤더 - 제목과 삭제 버튼 */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1 min-w-0">
           <h3 className={`font-bold text-lg truncate ${
@@ -319,18 +322,36 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
             {coffee.titleEn}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1 ml-4">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            coffee.active 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {coffee.active ? '활성' : '비활성'}
-          </span>
+        <div className="flex items-center gap-2 ml-4">
           <span className="text-sm font-medium text-text-primary">
             ₩{(coffee.price || 0).toLocaleString()}
           </span>
+          <button
+            onClick={() => onDelete(coffee.id)}
+            className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors touch-manipulation"
+            title="삭제"
+          >
+            <Icons.Delete className="w-4 h-4" />
+          </button>
         </div>
+      </div>
+
+      {/* 활성화 토글과 상태 */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-text-primary">활성화</span>
+          <ToggleButton
+            checked={coffee.active}
+            onChange={(checked) => onToggleActive(coffee.id, checked)}
+          />
+        </div>
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          coffee.active 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {coffee.active ? '활성' : '비활성'}
+        </span>
       </div>
 
       {/* 풍미 노트 배지 */}
@@ -360,18 +381,12 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
 
       {/* 원산지 정보 */}
       {coffee.country && (
-        <div className="mb-2 text-xs text-gray-600">
+        <div className="mb-3 text-xs text-gray-600">
           📍 {coffee.country}{coffee.region && `, ${coffee.region}`}
         </div>
       )}
 
-      {/* 날짜 정보 추가 */}
-      <div className="mb-3 text-xs text-gray-500 flex justify-between items-center">
-        <div>생성: {formatDate(coffee.createdAt)}</div>
-        <div>수정: {formatDate(coffee.updatedAt)}</div>
-      </div>
-
-      {/* 간단한 아이콘 버튼들 */}
+      {/* 액션 버튼들 */}
       <div className="flex gap-2">
         <button
           onClick={copyHomeUrl}
@@ -386,24 +401,6 @@ function CoffeeCard({ coffee, onEdit, onDelete, onToggleActive }: CoffeeCardProp
           title="편집"
         >
           <Icons.Edit className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onToggleActive(coffee.id, !coffee.active)}
-          className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
-            coffee.active
-              ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-              : 'bg-green-100 text-green-600 hover:bg-green-200'
-          }`}
-          title={coffee.active ? '비활성화' : '활성화'}
-        >
-          <Icons.Toggle className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onDelete(coffee.id)}
-          className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
-          title="삭제"
-        >
-          <Icons.Delete className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -439,6 +436,7 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
     <div className={`border rounded-xl p-4 transition-all duration-200 hover:shadow-lg ${
       product.active ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
     }`}>
+      {/* 상단 헤더 - 제목과 삭제 버튼 */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1 min-w-0">
           <h3 className={`font-bold text-lg truncate ${
@@ -454,20 +452,39 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
             </p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1 ml-4">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            product.active 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {product.active ? '활성' : '비활성'}
-          </span>
+        <div className="flex items-center gap-2 ml-4">
           <span className="text-sm font-medium text-text-primary">
             ₩{product.price.toLocaleString()}
           </span>
+          <button
+            onClick={() => onDelete(product.id)}
+            className="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors touch-manipulation"
+            title="삭제"
+          >
+            <Icons.Delete className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
+      {/* 활성화 토글과 상태 */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-text-primary">활성화</span>
+          <ToggleButton
+            checked={product.active}
+            onChange={(checked) => onToggleActive(product.id, checked)}
+          />
+        </div>
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          product.active 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {product.active ? '활성' : '비활성'}
+        </span>
+      </div>
+
+      {/* 카테고리 */}
       <div className="mb-3">
         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
           product.active 
@@ -478,13 +495,7 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
         </span>
       </div>
 
-      {/* 날짜 정보 추가 */}
-      <div className="mb-3 text-xs text-gray-500 flex justify-between items-center">
-        <div>생성: {formatDate(product.createdAt)}</div>
-        <div>수정: {formatDate(product.updatedAt)}</div>
-      </div>
-
-      {/* 간단한 아이콘 버튼들 */}
+      {/* 액션 버튼들 */}
       <div className="flex gap-2">
         <button
           onClick={copyHomeUrl}
@@ -499,24 +510,6 @@ function ProductCard({ product, onEdit, onDelete, onToggleActive }: ProductCardP
           title="편집"
         >
           <Icons.Edit className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onToggleActive(product.id, !product.active)}
-          className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
-            product.active
-              ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-              : 'bg-green-100 text-green-600 hover:bg-green-200'
-          }`}
-          title={product.active ? '비활성화' : '활성화'}
-        >
-          <Icons.Toggle className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onDelete(product.id)}
-          className="flex items-center justify-center w-10 h-10 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors touch-manipulation"
-          title="삭제"
-        >
-          <Icons.Delete className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -1438,16 +1431,6 @@ export function Dashboard() {
                     placeholder="커피에 대한 자세한 설명을 입력해주세요"
                   />
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-text-primary">
-                    커피 활성화
-                  </label>
-                  <ToggleButton
-                    checked={formData.active}
-                    onChange={(checked) => handleInputChange('active', checked)}
-                  />
-                </div>
               </div>
             </div>
             
@@ -1608,16 +1591,6 @@ export function Dashboard() {
                       </div>
                     )}
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-text-primary">
-                    상품 활성화
-                  </label>
-                  <ToggleButton
-                    checked={productFormData.active}
-                    onChange={(checked) => handleProductInputChange('active', checked)}
-                  />
                 </div>
               </div>
             </div>

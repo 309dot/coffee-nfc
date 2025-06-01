@@ -33,28 +33,32 @@ export function FlavorNoteModal({ isOpen, onClose, flavorNoteName }: FlavorNoteM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/55 backdrop-blur-sm p-6">
-      <div className="bg-white rounded-2xl w-full max-w-sm h-[620px] flex flex-col overflow-hidden shadow-2xl">
-        {/* Top Section with Image and Close Button */}
-        <div className="relative flex-shrink-0">
-          {/* Background Image */}
-          <div 
-            className="w-full h-[281px] bg-gray-200 rounded-t-2xl relative"
-            style={{
-              backgroundImage: flavorNote?.imageUrl ? `url(${flavorNote.imageUrl})` : 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
-            {/* Close Button */}
+    <>
+      {/* 백드롭 */}
+      <div 
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClose}
+      />
+      
+      {/* 모달 컨테이너 */}
+      <div className="fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out translate-y-0">
+        <div className="bg-white rounded-t-3xl shadow-2xl max-h-[80vh] flex flex-col">
+          {/* 드래그 핸들 */}
+          <div className="flex justify-center pt-3 pb-2">
+            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          </div>
+          
+          {/* 헤더 */}
+          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900">풍미 노트</h2>
             <button
               onClick={onClose}
-              className="absolute top-4 right-6 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-200 transition-colors"
+              className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <path 
                   d="M18 6L6 18M6 6l12 12" 
-                  stroke="rgba(15, 19, 36, 0.6)" 
+                  stroke="currentColor" 
                   strokeWidth="2" 
                   strokeLinecap="round" 
                   strokeLinejoin="round"
@@ -62,90 +66,76 @@ export function FlavorNoteModal({ isOpen, onClose, flavorNoteName }: FlavorNoteM
               </svg>
             </button>
           </div>
-        </div>
 
-        {/* Content Container - 고정 높이와 스크롤 처리 */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-pulse">
-                <div className="w-16 h-16 bg-gray-200 rounded-full mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
+          {/* 컨텐츠 */}
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-pulse text-center">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+                </div>
               </div>
-            </div>
-          ) : flavorNote ? (
-            <div className="space-y-2">
-              {/* Category */}
-              <p 
-                className="text-sm font-normal leading-relaxed break-keep word-break-keep"
-                style={{
-                  fontFamily: 'Inter',
-                  fontSize: '14px',
-                  lineHeight: '1.4285714285714286em',
-                  letterSpacing: '-0.7142857249294009%',
-                  color: 'rgba(13, 17, 38, 0.4)'
-                }}
-              >
-                taste note
-              </p>
+            ) : flavorNote ? (
+              <div className="space-y-6">
+                {/* 메인 정보 */}
+                <div className="text-center">
+                  <div className="text-6xl mb-4">{flavorNote.emoji}</div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {flavorNote.titleKo}
+                  </h3>
+                  <p className="text-lg text-gray-600 mb-1">
+                    {flavorNote.titleEn}
+                  </p>
+                  {flavorNote.category && (
+                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                      {flavorNote.category}
+                    </span>
+                  )}
+                </div>
 
-              {/* Emoji */}
-              <h2 
-                className="font-bold break-keep word-break-keep"
-                style={{
-                  fontFamily: 'Inter',
-                  fontWeight: 700,
-                  fontSize: '24px',
-                  lineHeight: '1.3333333333333333em',
-                  letterSpacing: '-1.2500000496705375%',
-                  color: '#14151A'
-                }}
-              >
-                {flavorNote.emoji}
-              </h2>
+                {/* 이미지 (있는 경우) */}
+                {flavorNote.imageUrl && (
+                  <div className="rounded-2xl overflow-hidden">
+                    <img
+                      src={flavorNote.imageUrl}
+                      alt={flavorNote.titleKo}
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
 
-              {/* Title */}
-              <h3 
-                className="font-bold break-keep word-break-keep"
-                style={{
-                  fontFamily: 'Inter',
-                  fontWeight: 700,
-                  fontSize: '24px',
-                  lineHeight: '1.3333333333333333em',
-                  letterSpacing: '-1.2500000496705375%',
-                  color: '#14151A'
-                }}
-              >
-                {flavorNote.titleEn}
-              </h3>
-
-              {/* Description */}
-              <p 
-                className="font-normal leading-relaxed break-keep word-break-keep"
-                style={{
-                  fontFamily: 'Inter',
-                  fontSize: '14px',
-                  lineHeight: '1.4285714285714286em',
-                  letterSpacing: '-0.7142857249294009%',
-                  color: '#14151A'
-                }}
-              >
-                {flavorNote.description}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center py-8 text-center">
-              <div className="text-4xl mb-4">🤔</div>
-              <p className="text-lg font-semibold text-text-primary break-keep word-break-keep">
-                풍미 노트를 찾을 수 없습니다
-              </p>
-              <p className="text-sm text-text-muted mt-2 break-keep word-break-keep">
-                "{flavorNoteName}" 정보가 등록되지 않았습니다.
-              </p>
-            </div>
-          )}
+                {/* 설명 */}
+                {flavorNote.description && (
+                  <div className="bg-gray-50 rounded-2xl p-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">설명</h4>
+                    <p className="text-gray-700 leading-relaxed">
+                      {flavorNote.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center py-12 text-center">
+                <div className="text-6xl mb-4">🤔</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  풍미 노트를 찾을 수 없습니다
+                </h3>
+                <p className="text-gray-600">
+                  "{flavorNoteName}" 정보가 등록되지 않았습니다.
+                </p>
+              </div>
+            )}
+          </div>
+          
+          {/* 하단 여백 (safe area) */}
+          <div className="pb-safe-bottom h-6" />
         </div>
       </div>
-    </div>
+    </>
   );
 } 
