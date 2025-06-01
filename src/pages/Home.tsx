@@ -139,15 +139,15 @@ export function Home() {
         {/* Comment Card */}
         <section className="relative z-10 rounded-2xl p-6" style={{ backgroundColor: '#8A9FFF' }}>
           <div className="flex flex-col gap-2">
-            {/* Avatar */}
-            <div className="w-8 h-8 bg-gray-300 rounded-full overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white font-semibold text-sm">
-                B
+            {/* Avatar - Apple Style */}
+            <div className="w-8 h-8 rounded-full overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm">
+                M
               </div>
             </div>
             
-            {/* Text Content */}
-            <div className="flex flex-col items-center justify-center gap-10">
+            {/* Text Content - Left Aligned */}
+            <div className="flex flex-col items-start gap-10">
               <p className="text-sm text-text-muted font-normal break-keep word-break-keep">
                 master comment
               </p>
