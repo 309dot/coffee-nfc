@@ -24,7 +24,7 @@ export function Badge({ children, variant = 'blue', className, onClick }: BadgeP
     <span 
       className={cn(
         'inline-flex items-center justify-center rounded-full text-sm font-medium border',
-        'px-[6px] py-1', // Figma padding: 4px 6px
+        'pl-3 pr-4 py-1', // 왼쪽 12px, 오른쪽 16px
         variant ? variants[variant] : 'bg-gray-100 text-gray-400 border-gray-200',
         {
           'cursor-pointer hover:opacity-80 transition-all duration-200': onClick
